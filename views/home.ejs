@@ -15,7 +15,7 @@
 
     <div class="hero-inner">
       <div class="hero-copy">
-        <div class="hero-kicker">✦ Ugandans in Boston &amp; beyond</div>
+        <div class="hero-kicker">Ugandans in Boston &amp; beyond</div>
         <h1>
           <span class="reveal">WELL...</span>
           <span class="reveal accent-coral">WHAT ARE WE</span>
@@ -23,7 +23,7 @@
         </h1>
         <p class="hero-tagline"><strong>You can stay home.</strong> But there are places to be, people to see, and stories you don't want explained later. Don't ask for pictures. <strong>Monday will still come.</strong></p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#join">Join the community <span class="arrow-circle">↗</span></a>
+          <a class="btn btn-primary" href="#join">Join the community <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
           <a class="btn btn-ghost" href="/events">See what's coming</a>
         </div>
       </div>
@@ -33,12 +33,12 @@
         <p class="eyebrow">Next up</p>
         <h2><%= next.title.toUpperCase() %></h2>
         <div class="meta">
-          <div>▣ <%= next.dateLabel %></div>
-          <% if (next.time) { %><div>◷ <%= next.time %></div><% } %>
-          <div>● <%= next.venue %></div>
+          <div><span class="lbl">When</span><%= next.dateLabel %></div>
+          <% if (next.time) { %><div><span class="lbl">Time</span><%= next.time %></div><% } %>
+          <div><span class="lbl">Where</span><%= next.venue %></div>
         </div>
         <div class="price-row"><span><%= next.subtitle %></span><strong><%= next.price %></strong></div>
-        <div class="flag">🔔 Join and we'll remind you when it's close</div>
+        <div class="flag">Join and we'll remind you when it's close</div>
       </a>
       <% } %>
     </div>
@@ -61,7 +61,7 @@
           <p class="eyebrow">What's coming</p>
           <h2 class="section-title">PLACES TO BE.</h2>
         </div>
-        <a class="text-link big-link" href="/events">All events →</a>
+        <a class="text-link big-link" href="/events">All events <%- icon('arrow', 15) %></a>
       </div>
       <div class="events-grid">
         <% upcoming.forEach(ev => { %><%- include('partials/event-card', { ev }) %><% }) %>
@@ -83,12 +83,12 @@
           <div class="orbit-ring ring-1"></div>
           <div class="orbit-ring ring-2"></div>
           <div class="orbit-spin">
-            <span class="bubble b1">Oli otya?</span>
-            <span class="bubble b2">Agandi?</span>
-            <span class="bubble b3">Itye nining?</span>
-            <span class="bubble b4">Yoga!</span>
-            <span class="bubble b5">Habari?</span>
-            <span class="bubble b6">Mirembe</span>
+            <span class="bubble b1">Friendship</span>
+            <span class="bubble b2">Laughter</span>
+            <span class="bubble b3">Networking</span>
+            <span class="bubble b4">Belonging</span>
+            <span class="bubble b5">Support</span>
+            <span class="bubble b6">Love</span>
           </div>
           <div class="orbit-core"><span>KYO<b>✺</b>NA</span></div>
         </div>
@@ -120,7 +120,7 @@
           <a class="cat-tile c-faith" href="/cities/boston#faith"><strong><%= counts.faith || 0 %></strong>Churches</a>
           <a class="cat-tile c-food" href="/cities/boston#food"><strong><%= counts.food || 0 %></strong>Places to eat</a>
         </div>
-        <a class="btn btn-ink" href="/cities/boston">Explore Greater Boston <span class="arrow-circle">↗</span></a>
+        <a class="btn btn-ink" href="/cities/boston">Explore Greater Boston <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
       </div>
     </div>
   </section>
@@ -131,7 +131,7 @@
     <div class="shell">
       <p class="script-big">Less "send me the flyer."</p>
       <h2>MORE "I ALREADY BOOKED."</h2>
-      <a class="btn btn-light" href="/about">Why we built this <span class="arrow-circle">↗</span></a>
+      <a class="btn btn-light" href="/about">Why we built this <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
     </div>
   </section>
 </main>

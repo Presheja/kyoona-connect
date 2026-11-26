@@ -79,9 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
       $("[data-om-addr]").textContent = o.address || o.town;
       $("[data-om-map]").href = o.map;
       show("[data-om-phone-row]", !!o.phone);
-      if (o.phone) { $("[data-om-phone]").textContent = o.phone; $("[data-om-phone]").href = "tel:" + o.phone.replace(/[^\d+]/g, ""); }
+      if (o.phone) { $("[data-om-phone]").textContent = o.phone; $("[data-om-phone-link]").href = "tel:" + o.phone.replace(/[^\d+]/g, ""); }
       show("[data-om-web-row]", !!o.website);
-      if (o.website) { $("[data-om-web]").textContent = o.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""); $("[data-om-web]").href = o.website; }
+      if (o.website) { $("[data-om-web]").textContent = o.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""); $("[data-om-web-link]").href = o.website; }
       $("[data-om-update]").href = o.update;
       $("[data-om-note]").hidden = !o.representative || !o.images.length;
       const main = $("[data-om-main]"), thumbs = $("[data-om-thumbs]");
@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Copy link buttons
   document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Copied ✓"; }
+    try { await navigator.clipboard.writeText(b.dataset.copy); b.lastChild.textContent = "Copied"; }
     catch { prompt("Copy this link:", b.dataset.copy); }
   }));
 });

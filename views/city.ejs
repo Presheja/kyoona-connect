@@ -17,7 +17,7 @@
   <section class="shell org-body">
     <div class="org-toolbar">
       <label class="org-search">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <%- icon('search', 16) %>
         <input type="search" placeholder="Search organizations..." data-org-search aria-label="Search organizations">
       </label>
       <div class="org-pills" data-org-pills>
@@ -38,10 +38,10 @@
           <div class="org-info">
             <span class="org-cat"><%= CAT[l.category] %></span>
             <h3><%= l.name %></h3>
-            <p class="org-where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><%= l.address || l.town %></p>
+            <p class="org-where"><%= l.address || l.town %></p>
             <p class="org-desc"><%= l.description %></p>
             <div class="org-foot">
-              <span class="org-status <%= l.verified ? 'ok' : '' %>"><%= l.verified ? '✓ Confirmed' : 'Details being confirmed' %></span>
+              <span class="org-status <%= l.verified ? 'ok' : '' %>"><%= l.verified ? 'Confirmed' : 'Details being confirmed' %></span>
               <button class="org-view" type="button" data-open="<%= i %>">View</button>
             </div>
           </div>
@@ -58,14 +58,14 @@
         <h2>Run an association, church or Ugandan business?</h2>
         <p>Get listed for free, or send us better photos and details for your page.</p>
       </div>
-      <a class="btn btn-primary" href="mailto:<%= contact %>?subject=Add%20a%20listing">Get listed <span class="arrow-circle">↗</span></a>
+      <a class="btn btn-primary" href="mailto:<%= contact %>?subject=Add%20a%20listing">Get listed <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
     </div>
   </section>
 
   <section class="join-strip-wrap">
     <div class="shell join-strip">
       <div><h2>NEW HERE? DON'T BE A STRANGER.</h2><p>Join the community and we'll let you know when the next gathering is on.</p></div>
-      <a class="btn btn-primary" href="/join">Join the community <span class="arrow-circle">↗</span></a>
+      <a class="btn btn-primary" href="/join">Join the community <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
     </div>
   </section>
 </main>
@@ -83,9 +83,9 @@
     <h2 id="om-title" data-om-name></h2>
     <p class="om-desc" data-om-desc></p>
     <ul class="om-rows">
-      <li data-om-addr-row><span class="om-ico">📍</span><div><strong data-om-addr></strong><a data-om-map target="_blank" rel="noopener">Open in Maps ↗</a></div></li>
-      <li data-om-phone-row><span class="om-ico">📞</span><div><a data-om-phone></a></div></li>
-      <li data-om-web-row><span class="om-ico">🌐</span><div><a data-om-web target="_blank" rel="noopener"></a></div></li>
+      <li data-om-addr-row><span class="om-lbl">Address</span><strong data-om-addr></strong><a class="om-btn" data-om-map target="_blank" rel="noopener"><%- icon('pin', 15) %>Open in Maps</a></li>
+      <li data-om-phone-row><span class="om-lbl">Phone</span><a class="om-btn" data-om-phone-link><%- icon('phone', 15) %><span data-om-phone></span></a></li>
+      <li data-om-web-row><span class="om-lbl">Website</span><a class="om-btn" data-om-web-link target="_blank" rel="noopener"><%- icon('globe', 15) %><span data-om-web></span></a></li>
     </ul>
     <a class="om-update" data-om-update>Is this yours? Update the details</a>
   </div>

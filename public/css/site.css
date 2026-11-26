@@ -260,7 +260,7 @@ main{overflow-x:clip}
 .detail-title span{display:block}
 .facts{list-style:none;padding:0;margin:0 0 1.4rem;display:grid;gap:.7rem}
 .facts li{display:flex;gap:.9rem;align-items:baseline;font-weight:600;color:var(--ink)}
-.facts b{color:var(--coral);width:18px;flex:none}
+.facts b{color:var(--coral);width:62px;flex:none;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
 .price-box{margin:2rem 0 1.2rem;padding:1.4rem 1.6rem;border-radius:22px;background:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
 .price-box span{display:block;font-size:.8rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.1em}
 .price-box strong{font-family:var(--display);font-weight:400;font-size:2.2rem;color:var(--ink)}
@@ -297,8 +297,7 @@ main{overflow-x:clip}
 
 .join-layout{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;padding-top:1rem}
 .perks{list-style:none;padding:0;margin:2rem 0 0;display:grid;gap:.9rem}
-.perks li{display:flex;gap:1rem;align-items:center;font-weight:600;color:var(--ink)}
-.perks span{width:46px;height:46px;border-radius:14px;background:var(--muted);display:grid;place-items:center;font-size:1.3rem}
+.perks li{font-weight:600;color:var(--ink);padding:.2rem 0 .2rem 1.1rem;border-left:4px solid var(--coral);line-height:1.5}
 .message{min-height:50vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
 .message form{margin-top:1rem}
 
@@ -309,8 +308,7 @@ main{overflow-x:clip}
 .values{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:2.4rem}
 .value{border-radius:26px;padding:2rem;color:#fff;transition:transform .25s}
 .value:hover{transform:translateY(-6px) rotate(-1deg)}
-.value span{font-size:2rem}
-.value h3{font-family:var(--display);font-weight:400;font-size:1.9rem;line-height:1;margin:1rem 0 .6rem}
+.value h3{font-family:var(--display);font-weight:400;font-size:1.9rem;line-height:1;margin:0 0 .7rem}
 .value p{margin:0;line-height:1.65;opacity:.92}
 .v1{background:var(--teal)}.v2{background:var(--coral)}.v3{background:var(--purple)}
 .faq-section{background:var(--muted)}
@@ -459,7 +457,6 @@ th{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--so
 .om-rows{list-style:none;padding:0;margin:0 0 1rem;display:grid;gap:.8rem}
 .om-rows li{display:flex;gap:.8rem;align-items:flex-start;padding:.85rem 1rem;background:var(--muted);border-radius:14px}
 .om-rows li[hidden]{display:none}
-.om-ico{font-size:1.1rem;line-height:1.3}
 .om-rows strong{display:block;color:var(--ink);font-size:.92rem;font-weight:600}
 .om-rows a{color:var(--coral);font-weight:700;font-size:.9rem;word-break:break-word}
 .om-update{margin-top:auto;font-size:.82rem;color:var(--soft);text-decoration:underline}
@@ -471,3 +468,15 @@ th{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--so
   .om-body{padding:1.4rem}
   .org-add{padding:1.6rem}
 }
+
+/* ---------- icons (single colour, buttons and pills only) ---------- */
+.ico{display:inline-block;vertical-align:-3px;flex:none}
+.arrow-circle .ico{vertical-align:middle}
+.vibe span{display:inline-flex;align-items:center;gap:.45rem}
+.chip{gap:.45rem}
+.share-btn{display:inline-flex;align-items:center;gap:.5rem}
+.hero-float .lbl{display:inline-block;width:54px;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow)}
+.om-rows li{flex-direction:column;align-items:flex-start;gap:.35rem}
+.om-lbl{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.om-btn{display:inline-flex;align-items:center;gap:.45rem;margin-top:.15rem;background:#fff;border:1.5px solid #e3dceb;color:var(--ink)!important;padding:.45rem .9rem;border-radius:999px;font-size:.85rem!important;font-weight:700;transition:border-color .2s,color .2s}
+.om-btn:hover{border-color:var(--coral);color:var(--coral)!important}

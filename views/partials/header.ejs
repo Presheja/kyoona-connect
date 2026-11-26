@@ -7,7 +7,7 @@
     <a class="nav-link <%= path.startsWith('/events') ? 'active' : '' %>" href="/events">Events</a>
     <a class="nav-link <%= path.startsWith('/cities') ? 'active' : '' %>" href="/cities/boston">Find your people</a>
     <a class="nav-link <%= path === '/about' ? 'active' : '' %>" href="/about">About</a>
-    <a class="nav-join" href="/join">Join the community <span class="arrow-circle">↗</span></a>
+    <a class="nav-join" href="/join">Join the community <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
   </nav>
   <button class="menu-dots" type="button" aria-label="Menu" aria-controls="nav" aria-expanded="false">•••</button>
 </header>

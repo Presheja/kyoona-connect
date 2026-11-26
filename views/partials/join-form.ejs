@@ -11,14 +11,14 @@
   <fieldset class="vibes">
     <legend>What gets you out of the house? <em>Pick all that apply</em></legend>
     <% interests.forEach(i => { %>
-      <label class="vibe"><input type="checkbox" name="interests" value="<%= i.key %>" <%= (typeof form !== 'undefined' && (form.interests||[]).includes(i.key)) ? 'checked' : '' %>><span><%= i.emoji %> <%= i.label %></span></label>
+      <label class="vibe"><input type="checkbox" name="interests" value="<%= i.key %>" <%= (typeof form !== 'undefined' && (form.interests||[]).includes(i.key)) ? 'checked' : '' %>><span><%- icon(i.key, 15) %><%= i.label %></span></label>
     <% }) %>
   </fieldset>
   <label class="consent"><input type="checkbox" name="consent" value="yes" required <%= (typeof form !== 'undefined' && form.consent) ? 'checked' : '' %>>
     <span>Email me about Kyoona Connect events and community news. I can unsubscribe any time. <a href="/privacy">Privacy</a></span></label>
   <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
   <div class="form-errors" role="alert" <%= (typeof errors !== 'undefined' && errors.length) ? '' : 'hidden' %>><%= (typeof errors !== 'undefined' ? errors : []).join(' ') %></div>
-  <button class="btn btn-primary btn-block" type="submit">Count me in <span class="arrow-circle">↗</span></button>
+  <button class="btn btn-primary btn-block" type="submit">Count me in <span class="arrow-circle"><%- icon('arrow', 15) %></span></button>
   <p class="form-note">WhatsApp updates are coming soon. Email first.</p>
 </form>
 <div class="join-done" hidden>

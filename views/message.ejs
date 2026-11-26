@@ -9,12 +9,12 @@
     <p class="lede">We've updated your preferences. Carry on.</p>
   <% } else if (kind === 'confirm-ask') { %>
     <p class="eyebrow">One last tap</p><h1 class="display-title">KEEP ME <span class="accent-coral">POSTED.</span></h1>
-    <form method="post" action="/confirm/<%= token %>"><button class="btn btn-primary" type="submit">Yes, I'm in <span class="arrow-circle">↗</span></button></form>
+    <form method="post" action="/confirm/<%= token %>"><button class="btn btn-primary" type="submit">Yes, I'm in <span class="arrow-circle"><%- icon('arrow', 15) %></span></button></form>
   <% } else if (kind === 'confirmed') { %>
     <div class="done-burst big" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
     <p class="eyebrow">Welcome<%= member && member.first_name ? ', ' + member.first_name : '' %></p><h1 class="display-title">YOU'RE <span class="accent-coral">IN.</span></h1>
     <p class="lede">You'll hear from us when something's happening. Meanwhile, here's what's already on.</p>
-    <a class="btn btn-primary" href="/events">See what's coming <span class="arrow-circle">↗</span></a>
+    <a class="btn btn-primary" href="/events">See what's coming <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
   <% } else if (kind === 'unsub-ask') { %>
     <p class="eyebrow">Leaving?</p><h1 class="display-title">NO HARD <span class="accent-coral">FEELINGS.</span></h1>
     <form method="post" action="/unsubscribe/<%= token %>"><button class="btn btn-ink" type="submit">Unsubscribe me</button></form>

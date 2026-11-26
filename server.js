@@ -17,6 +17,7 @@ const express = require("express");
 const content = require("./src/content");
 const store = require("./src/store");
 const mailer = require("./src/mailer");
+const icon = require("./src/icons");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,12 +27,12 @@ const SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString("he
 const CONTACT = process.env.CONTACT_EMAIL || "hello@kyoonaconnect.com";
 
 const INTERESTS = [
-  { key: "nightlife", label: "Nights out", emoji: "🪩" },
-  { key: "faith", label: "Church & faith", emoji: "🙏🏾" },
-  { key: "family", label: "Family & kids", emoji: "🧒🏾" },
-  { key: "food", label: "Food & culture", emoji: "🍌" },
-  { key: "convention", label: "Conventions & travel", emoji: "✈️" },
-  { key: "business", label: "Business & networking", emoji: "🤝🏾" }
+  { key: "nightlife", label: "Nights out" },
+  { key: "faith", label: "Church & faith" },
+  { key: "family", label: "Family & kids" },
+  { key: "food", label: "Food & culture" },
+  { key: "convention", label: "Conventions & travel" },
+  { key: "business", label: "Business & networking" }
 ];
 const CITIES = ["Greater Boston", "Elsewhere in New England", "DC & Maryland", "Dallas–Fort Worth", "Los Angeles", "Somewhere else"];
 
@@ -50,6 +51,7 @@ app.use((req, res, next) => {
   res.locals.path = req.path;
   res.locals.contact = CONTACT;
   res.locals.interests = INTERESTS;
+  res.locals.icon = icon;
   res.locals.cities = CITIES;
   res.locals.meta = { title: "Kyoona Connect", description: "Where Ugandans in the diaspora find each other. Events, community, and a reason to leave the house.", image: "/media/og-image.jpg" };
   next();

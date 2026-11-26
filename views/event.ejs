@@ -1,7 +1,7 @@
 <%- include('partials/head') %>
 <%- include('partials/header') %>
 <main class="page-shell">
-  <a class="back-link" href="/events">← All events</a>
+  <a class="back-link" href="/events">Back to all events</a>
   <div class="detail-layout">
     <div class="detail-poster art-<%= ev.art || 'purple' %> <%= ev.image ? 'has-image' : '' %>" <% if (ev.image) { %>style="background-image:url('<%= ev.image %>')"<% } %>>
       <% if (!ev.image) { %>
@@ -14,25 +14,25 @@
       <p class="eyebrow"><%= ev.past ? 'This one already happened' : (ev.dateConfirmed ? (ev.daysAway === 0 ? 'Today!' : ev.daysAway === 1 ? 'Tomorrow' : 'In ' + ev.daysAway + ' days') : 'Save the date') %></p>
       <h1 class="detail-title"><%= ev.title.toUpperCase() %><% if (ev.subtitle) { %> <span class="accent-coral"><%= ev.subtitle.toUpperCase() %></span><% } %></h1>
       <ul class="facts">
-        <li><b>▣</b><span><%= ev.dateLabel %></span></li>
-        <% if (ev.time) { %><li><b>◷</b><span><%= ev.time %></span></li><% } %>
-        <li><b>●</b><span><%= ev.venue %><%= ev.address ? ', ' + ev.address : '' %></span></li>
-        <li><b>✺</b><span>Hosted by <%= ev.host %></span></li>
+        <li><b>Date</b><span><%= ev.dateLabel %></span></li>
+        <% if (ev.time) { %><li><b>Time</b><span><%= ev.time %></span></li><% } %>
+        <li><b>Where</b><span><%= ev.venue %><%= ev.address ? ', ' + ev.address : '' %></span></li>
+        <li><b>Host</b><span><%= ev.host %></span></li>
       </ul>
       <p class="lede"><%= ev.description %></p>
       <div class="price-box">
         <div><span>Entry</span><strong><%= ev.price %></strong></div>
         <% if (ev.past) { %>
-          <a class="btn btn-primary" href="/join">Don't miss the next one <span class="arrow-circle">↗</span></a>
+          <a class="btn btn-primary" href="/join">Don't miss the next one <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
         <% } else if (ev.ticketUrl) { %>
-          <a class="btn btn-primary" href="<%= ev.ticketUrl %>" target="_blank" rel="noopener">Get tickets <span class="arrow-circle">↗</span></a>
+          <a class="btn btn-primary" href="<%= ev.ticketUrl %>" target="_blank" rel="noopener">Get tickets <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
         <% } else { %>
-          <a class="btn btn-primary" href="/join">Remind me <span class="arrow-circle">↗</span></a>
+          <a class="btn btn-primary" href="/join">Remind me <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
         <% } %>
       </div>
       <div class="share-row">
-        <a class="share-btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=<%= encodeURIComponent(ev.title + ' — ' + ev.dateLabel + ' ' + site + '/events/' + ev.slug) %>">Send to the group chat</a>
-        <button class="share-btn" type="button" data-copy="<%= site %>/events/<%= ev.slug %>">Copy link</button>
+        <a class="share-btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=<%= encodeURIComponent(ev.title + ' — ' + ev.dateLabel + ' ' + site + '/events/' + ev.slug) %>"><%- icon('chat', 15) %>Send to the group chat</a>
+        <button class="share-btn" type="button" data-copy="<%= site %>/events/<%= ev.slug %>"><%- icon('link', 15) %><span>Copy link</span></button>
       </div>
     </div>
   </div>
