@@ -1,0 +1,20 @@
+{
+  "name": "kyoona-connect",
+  "version": "2.0.0",
+  "description": "Kyoona Connect — events and community for Ugandans in the diaspora",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "ejs": "^7.0.2",
+    "express": "^4.22.3",
+    "mysql2": "^3.24.6",
+    "nodemailer": "^10.6.1"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}

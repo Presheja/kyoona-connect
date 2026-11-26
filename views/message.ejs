@@ -1,0 +1,38 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="page-shell message">
+  <% if (kind === 'check') { %>
+    <p class="eyebrow">Nearly there</p><h1 class="display-title">CHECK YOUR <span class="accent-coral">INBOX.</span></h1>
+    <p class="lede">We sent you one email with one button. Tap it and you're in. Not there in a minute? Peek in Promotions or Spam.</p>
+  <% } else if (kind === 'updated') { %>
+    <p class="eyebrow">All set</p><h1 class="display-title">YOU'RE ALREADY <span class="accent-coral">IN.</span></h1>
+    <p class="lede">We've updated your preferences. Carry on.</p>
+  <% } else if (kind === 'confirm-ask') { %>
+    <p class="eyebrow">One last tap</p><h1 class="display-title">KEEP ME <span class="accent-coral">POSTED.</span></h1>
+    <form method="post" action="/confirm/<%= token %>"><button class="btn btn-primary" type="submit">Yes, I'm in <span class="arrow-circle">↗</span></button></form>
+  <% } else if (kind === 'confirmed') { %>
+    <div class="done-burst big" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <p class="eyebrow">Welcome<%= member && member.first_name ? ', ' + member.first_name : '' %></p><h1 class="display-title">YOU'RE <span class="accent-coral">IN.</span></h1>
+    <p class="lede">You'll hear from us when something's happening. Meanwhile, here's what's already on.</p>
+    <a class="btn btn-primary" href="/events">See what's coming <span class="arrow-circle">↗</span></a>
+  <% } else if (kind === 'unsub-ask') { %>
+    <p class="eyebrow">Leaving?</p><h1 class="display-title">NO HARD <span class="accent-coral">FEELINGS.</span></h1>
+    <form method="post" action="/unsubscribe/<%= token %>"><button class="btn btn-ink" type="submit">Unsubscribe me</button></form>
+  <% } else if (kind === 'unsubscribed') { %>
+    <p class="eyebrow">Done</p><h1 class="display-title">YOU'RE <span class="accent-coral">OFF THE LIST.</span></h1>
+    <p class="lede">No more emails. If you change your mind, the door's open.</p>
+    <a class="btn btn-ink" href="/join">Rejoin</a>
+  <% } else if (kind === 'bad-link') { %>
+    <p class="eyebrow">Hmm</p><h1 class="display-title">THAT LINK <span class="accent-coral">DIDN'T WORK.</span></h1>
+    <p class="lede">It may be old or incomplete. You can sign up again. It takes ten seconds.</p>
+    <a class="btn btn-primary" href="/join">Join the community</a>
+  <% } else if (kind === '404') { %>
+    <p class="eyebrow">404</p><h1 class="display-title">THIS PAGE <span class="accent-coral">LEFT EARLY.</span></h1>
+    <p class="lede">Like that one uncle at every party. Let's get you back.</p>
+    <a class="btn btn-primary" href="/">Home</a>
+  <% } else { %>
+    <p class="eyebrow">Oops</p><h1 class="display-title">SOMETHING <span class="accent-coral">BROKE.</span></h1>
+    <p class="lede">Try again in a minute.</p>
+  <% } %>
+</main>
+<%- include('partials/footer') %>

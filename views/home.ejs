@@ -1,0 +1,139 @@
+<%- include('partials/head', { bodyClass: 'home' }) %>
+<%- include('partials/header', { headerDark: true }) %>
+
+<main>
+  <!-- HERO: full-bleed video, from the tickets site -->
+  <section class="hero-stage">
+    <div class="hero-media">
+      <video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="/media/hero.jpg" aria-hidden="true" tabindex="-1">
+        <source src="/media/hero.mp4" type="video/mp4">
+      </video>
+      <div class="hero-scrim"></div>
+      <div class="hero-grain"></div>
+      <div class="hero-orbit-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="hero-kicker">✦ Ugandans in Boston &amp; beyond</div>
+        <h1>
+          <span class="reveal">WELL...</span>
+          <span class="reveal accent-coral">WHAT ARE WE</span>
+          <span class="reveal">DOING NEXT<span class="accent-dot">?</span></span>
+        </h1>
+        <p class="hero-tagline"><strong>You can stay home.</strong> But there are places to be, people to see, and stories you don't want explained later. Don't ask for pictures. <strong>Monday will still come.</strong></p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#join">Join the community <span class="arrow-circle">↗</span></a>
+          <a class="btn btn-ghost" href="/events">See what's coming</a>
+        </div>
+      </div>
+
+      <% if (next) { %>
+      <a class="hero-float" href="/events/<%= next.slug %>">
+        <p class="eyebrow">Next up</p>
+        <h2><%= next.title.toUpperCase() %></h2>
+        <div class="meta">
+          <div>▣ <%= next.dateLabel %></div>
+          <% if (next.time) { %><div>◷ <%= next.time %></div><% } %>
+          <div>● <%= next.venue %></div>
+        </div>
+        <div class="price-row"><span><%= next.subtitle %></span><strong><%= next.price %></strong></div>
+        <div class="flag">🔔 Join and we'll remind you when it's close</div>
+      </a>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <% for (let r = 0; r < 2; r++) { %>
+        <span>NIGHTS OUT</span><i>✺</i><span>SUNDAY SERVICE</span><i>✺</i><span>KWANJULA SEASON</span><i>✺</i><span>FAMILY DAYS</span><i>✺</i><span>LUWOMBO</span><i>✺</i><span>CONVENTIONS</span><i>✺</i><span>BRUNCHES</span><i>✺</i><span>THE RANDOM FUNCTION EVERYONE KNEW ABOUT EXCEPT YOU</span><i>✺</i>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- EVENTS -->
+  <section class="section">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">What's coming</p>
+          <h2 class="section-title">PLACES TO BE.</h2>
+        </div>
+        <a class="text-link big-link" href="/events">All events →</a>
+      </div>
+      <div class="events-grid">
+        <% upcoming.forEach(ev => { %><%- include('partials/event-card', { ev }) %><% }) %>
+        <% past.forEach(ev => { %>
+          <div class="missed-wrap">
+            <%- include('partials/event-card', { ev }) %>
+            <p class="missed-note"><span class="script-inline">Missed it?</span> Join the community and the next one won't sneak past you.</p>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORBIT + JOIN: from the community app -->
+  <section class="orbit-section" id="join">
+    <div class="shell orbit-grid">
+      <div class="orbit-side">
+        <div class="orbit" aria-hidden="true">
+          <div class="orbit-ring ring-1"></div>
+          <div class="orbit-ring ring-2"></div>
+          <div class="orbit-spin">
+            <span class="bubble b1">Oli otya?</span>
+            <span class="bubble b2">Agandi?</span>
+            <span class="bubble b3">Itye nining?</span>
+            <span class="bubble b4">Yoga!</span>
+            <span class="bubble b5">Habari?</span>
+            <span class="bubble b6">Mirembe</span>
+          </div>
+          <div class="orbit-core"><span>KYO<b>✺</b>NA</span></div>
+        </div>
+        <h2 class="orbit-title">LET'S CONNECT <span>TOGETHER.</span></h2>
+        <p class="orbit-sub">Six WhatsApp groups, three flyers, somebody's status, and a cousin who swears they sent you the details. Or: one list. Join the Kyoona Connect community and we'll email you when something's happening.</p>
+      </div>
+      <div class="join-card">
+        <p class="eyebrow">Join the community</p>
+        <h3 class="join-title">Be the first to know.</h3>
+        <%- include('partials/join-form') %>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIND YOUR PEOPLE -->
+  <% if (boston) { %>
+  <section class="section people">
+    <div class="shell people-grid">
+      <div class="people-photo" style="background-image:url('<%= boston.image %>')">
+        <span class="sticker">Little Kampala<br>is real.</span>
+      </div>
+      <div class="people-copy">
+        <p class="eyebrow">Find your people</p>
+        <h2 class="section-title">JUST MOVED?<br><span class="accent-coral">WE GOT YOU.</span></h2>
+        <p class="lede">Associations, churches, Luganda services, luwombo, rolex and the people who make it all happen, around Waltham and Greater Boston.</p>
+        <div class="cat-row">
+          <% const counts = {}; boston.listings.forEach(l => counts[l.category] = (counts[l.category]||0)+1); %>
+          <a class="cat-tile c-community" href="/cities/boston#community"><strong><%= counts.community || 0 %></strong>Associations</a>
+          <a class="cat-tile c-faith" href="/cities/boston#faith"><strong><%= counts.faith || 0 %></strong>Churches</a>
+          <a class="cat-tile c-food" href="/cities/boston#food"><strong><%= counts.food || 0 %></strong>Places to eat</a>
+        </div>
+        <a class="btn btn-ink" href="/cities/boston">Explore Greater Boston <span class="arrow-circle">↗</span></a>
+      </div>
+    </div>
+  </section>
+  <% } %>
+
+  <!-- MANIFESTO -->
+  <section class="manifesto">
+    <div class="shell">
+      <p class="script-big">Less "send me the flyer."</p>
+      <h2>MORE "I ALREADY BOOKED."</h2>
+      <a class="btn btn-light" href="/about">Why we built this <span class="arrow-circle">↗</span></a>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

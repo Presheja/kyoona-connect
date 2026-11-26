@@ -1,0 +1,45 @@
+<%- include('../partials/head', { bodyClass: 'admin' }) %>
+<main class="admin-shell">
+  <div class="admin-top">
+    <a class="brand" href="/"><span class="brand-main">KYO<span class="brand-flower">✺</span>NA</span><span class="brand-sub">CONNECT</span></a>
+    <form method="post" action="/admin/logout"><button class="chip">Log out</button></form>
+  </div>
+  <% if (!mailOn) { %><div class="admin-warn">Email isn't connected yet (SMTP settings missing), so emails are only printed to the server log. Add the SMTP settings to send for real.</div><% } %>
+  <% if (sent !== undefined) { %><div class="admin-ok">Sent <%= sent %> email<%= sent == 1 ? '' : 's' %>.</div><% } %>
+
+  <div class="stat-row">
+    <div class="stat s1"><strong><%= counts.confirmed %></strong>Confirmed members</div>
+    <div class="stat s2"><strong><%= counts.pending %></strong>Waiting to confirm</div>
+    <div class="stat s3"><strong><%= counts.unsubscribed %></strong>Unsubscribed</div>
+  </div>
+
+  <section class="admin-card">
+    <h2>Tell the community about an event</h2>
+    <form method="post" action="/admin/announce" class="announce" onsubmit="return this.test.checked || confirm('Send this email to the selected members?')">
+      <label class="field"><span>Event</span>
+        <select name="slug"><% events.forEach(e => { %><option value="<%= e.slug %>"><%= e.title %> (<%= e.dateLabel %>)</option><% }) %></select></label>
+      <label class="field"><span>Send to</span>
+        <select name="audience">
+          <option value="all">All confirmed members</option>
+          <option value="interest">Only members interested in this event's category</option>
+          <option value="boston">Only Greater Boston members</option>
+        </select></label>
+      <label class="consent"><input type="checkbox" name="test" value="yes" checked><span>Send a test to <%= contact %> only</span></label>
+      <button class="btn btn-primary" type="submit">Send <span class="arrow-circle">↗</span></button>
+    </form>
+  </section>
+
+  <section class="admin-card">
+    <div class="admin-card-head"><h2>Members</h2><a class="chip" href="/admin/members.csv">Download CSV</a></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Email</th><th>Name</th><th>City</th><th>Into</th><th>Status</th><th>Joined</th></tr></thead>
+      <tbody>
+      <% members.forEach(m => { %>
+        <tr><td><%= m.email %></td><td><%= m.first_name %></td><td><%= m.city %></td><td><%= (m.interests || '').split(',').filter(Boolean).join(', ') %></td><td><span class="status st-<%= m.status %>"><%= m.status %></span></td><td><%= String(m.created_at).slice(0,10) %></td></tr>
+      <% }) %>
+      <% if (!members.length) { %><tr><td colspan="6">No members yet. Go share that link.</td></tr><% } %>
+      </tbody>
+    </table></div>
+  </section>
+</main>
+</body></html>

@@ -1,0 +1,29 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="page-shell">
+  <p class="eyebrow">Events</p>
+  <h1 class="display-title">WHAT'S <span class="accent-coral">ON.</span></h1>
+  <p class="lede">Nights out, church gatherings, family days and the conventions people travel for. Pick one. Go.</p>
+  <div class="filter-bar" data-filter>
+    <button class="chip is-on" data-cat="all">Everything</button>
+    <% interests.forEach(i => { if (upcoming.some(e => e.category === i.key)) { %><button class="chip" data-cat="<%= i.key %>"><%= i.emoji %> <%= i.label %></button><% } }) %>
+  </div>
+  <div class="events-grid" data-filter-target>
+    <% upcoming.forEach(ev => { %><div data-cat="<%= ev.category %>"><%- include('partials/event-card', { ev }) %></div><% }) %>
+  </div>
+  <% if (!upcoming.length) { %><p class="empty-note">Nothing on the calendar right now. Join the community and you'll hear first.</p><% } %>
+
+  <div class="join-strip">
+    <div><h2>NEVER FIND OUT LATE AGAIN.</h2><p>Get an email when something new goes up. That's it.</p></div>
+    <a class="btn btn-primary" href="/join">Join the community <span class="arrow-circle">↗</span></a>
+  </div>
+
+  <% if (past.length) { %>
+  <h2 class="section-title small-top">BEEN THERE.</h2>
+  <div class="events-grid">
+    <% past.forEach(ev => { %><%- include('partials/event-card', { ev }) %><% }) %>
+  </div>
+  <% } %>
+  <p class="organizer-note">Organizing something for the community? <a class="text-link" href="mailto:<%= contact %>?subject=List%20my%20event">Send us the details</a> and we'll put it up.</p>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,16 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="page-shell prose">
+  <p class="eyebrow">Privacy</p>
+  <h1 class="display-title">THE <span class="accent-coral">SHORT VERSION.</span></h1>
+  <h3>What we collect</h3>
+  <p>When you join the community: your email, and if you give them, your first name, city, and the kinds of events you're interested in.</p>
+  <h3>What we do with it</h3>
+  <p>We email you about Kyoona Connect events and community news that match what you told us. Nothing else.</p>
+  <h3>Who we share it with</h3>
+  <p>Nobody. We don't sell or rent your details. Our email provider sends the messages on our behalf.</p>
+  <h3>Leaving</h3>
+  <p>Every email has an unsubscribe link. One click and you're off the list. Want your details deleted completely? Email <a class="text-link" href="mailto:<%= contact %>"><%= contact %></a>.</p>
+  <p class="fine">Last updated <%= new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) %>.</p>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= meta.title %></title>
+  <meta name="description" content="<%= meta.description %>">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Kyoona Connect">
+  <meta property="og:title" content="<%= meta.title %>">
+  <meta property="og:description" content="<%= meta.description %>">
+  <meta property="og:url" content="<%= site + path %>">
+  <% if (meta.image) { %><meta property="og:image" content="<%= site + meta.image %>"><% } %>
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#25105a">
+  <link rel="preload" href="/fonts/anton-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css?v=1">
+  <script src="/js/site.js?v=1" defer></script>
+</head>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">

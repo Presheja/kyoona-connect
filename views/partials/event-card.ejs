@@ -1,0 +1,17 @@
+<a class="event-card <%= ev.past ? 'is-past' : '' %>" href="/events/<%= ev.slug %>">
+  <div class="event-art art-<%= ev.art || 'purple' %> <%= ev.image ? 'has-image' : '' %>" <% if (ev.image) { %>style="background-image:url('<%= ev.image %>')"<% } %>>
+    <span class="event-chip"><%= ev.past ? 'Past' : ev.price %></span>
+    <% if (!ev.image) { %>
+      <div class="script"><%= ev.kicker %></div>
+      <h3><%= ev.title %></h3>
+      <p><%= ev.subtitle %></p>
+    <% } %>
+  </div>
+  <div class="event-info">
+    <div class="date-pill"><strong><%= ev.day %></strong><span><%= ev.month %></span></div>
+    <div>
+      <h4><%= ev.title %><%= ev.subtitle ? ' – ' + ev.subtitle : '' %></h4>
+      <div class="meta"><%= ev.dateConfirmed ? ev.weekday : 'Date TBC' %><%= ev.time ? ' · ' + ev.time : '' %> · <%= ev.venue %></div>
+    </div>
+  </div>
+</a>

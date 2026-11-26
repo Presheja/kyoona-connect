@@ -1,0 +1,132 @@
+{
+  "slug": "boston",
+  "name": "Greater Boston",
+  "region": "Massachusetts",
+  "tagline": "Waltham is nicknamed “Little Kampala” for a reason.",
+  "intro": "Massachusetts has the largest Ugandan-born population of any US state, and much of it is right here around Waltham. Start with the places below — every one of them is run by people who were new here once too.",
+  "lastChecked": "November 2026",
+  "listings": [
+    {
+      "name": "Uganda Boston Community Association (UBCA)",
+      "category": "community",
+      "town": "Waltham area",
+      "description": "The local community association for Ugandans in Greater Boston. A good first call if you are new and want to know what is happening.",
+      "address": "",
+      "phone": "",
+      "website": "",
+      "source": "https://watchdoguganda.com/?p=159232",
+      "verified": false
+    },
+    {
+      "name": "Ugandan North American Association (UNAA)",
+      "category": "community",
+      "town": "Arlington / Waltham",
+      "description": "The umbrella association for Ugandans across North America. Best known for its big annual convention every Labor Day weekend.",
+      "address": "",
+      "phone": "",
+      "website": "https://unaa.org",
+      "source": "https://en.wikipedia.org/wiki/Ugandan_Americans",
+      "verified": false
+    },
+    {
+      "name": "Africano Waltham (African Cultural Services, Inc.)",
+      "category": "community",
+      "town": "Waltham",
+      "description": "Youth and family centre for African immigrant families — homework help, cultural programmes, dance and support settling in. Especially useful if you arrived with children.",
+      "address": "703 Main St, Waltham, MA",
+      "phone": "",
+      "website": "",
+      "source": "https://gbfb.org/2021/09/07/food-for-little-kampala",
+      "verified": false
+    },
+    {
+      "name": "Ugandan Catholic Community in the Archdiocese of Boston (UCCB)",
+      "category": "faith",
+      "town": "Waltham",
+      "description": "Weekly Mass for the Ugandan Catholic community at St. Mary’s, with a Ugandan priest. Hosts the yearly Uganda Martyrs Day celebration in June.",
+      "address": "St. Mary’s Parish, 133 School St, Waltham, MA 02451",
+      "phone": "",
+      "website": "https://www.uccb.us",
+      "source": "https://eadm.news/70-2024/369-glorious-countdown-to-the-feast-of-the-uganda-martyrs-in-boston-waxing-spiritual",
+      "verified": false
+    },
+    {
+      "name": "St. Peter’s Anglican Church",
+      "category": "faith",
+      "town": "Winchester",
+      "description": "Ugandan Anglican congregation that started as a Christmas prayer group in 2006. Worships in Luganda using the Church of Uganda prayer book. Now in its own building in Winchester.",
+      "address": "Winchester, MA",
+      "phone": "",
+      "website": "",
+      "source": "https://eadm.news/39-carousel/big/368-finally-ugandan-founded-st-peter-s-anglican-church-finds-new-home-in-winchester-massachusetts",
+      "verified": false
+    },
+    {
+      "name": "St. Paul’s Anglican Church",
+      "category": "faith",
+      "town": "Arlington",
+      "description": "Part of the Ugandan Archdeaconry of the Anglican Diocese of New England. Moved from Waltham and now worships at Covenant Church in Arlington.",
+      "address": "Covenant Church, Arlington, MA",
+      "phone": "",
+      "website": "",
+      "source": "https://adne.org/news-from-the-diocese-1/stpeterssports-8ky89-6crp9-zpxrn",
+      "verified": false
+    },
+    {
+      "name": "St. Luke’s Anglican Church",
+      "category": "faith",
+      "town": "Wayland",
+      "description": "Another congregation in the Ugandan Anglican family around Boston.",
+      "address": "Wayland, MA",
+      "phone": "",
+      "website": "",
+      "source": "https://adne.org/news-from-the-diocese-1/ugandanarchbishop",
+      "verified": false
+    },
+    {
+      "name": "New England Luganda SDA Church",
+      "category": "faith",
+      "town": "Billerica",
+      "description": "A mostly Ugandan Seventh-day Adventist congregation.",
+      "address": "Billerica, MA",
+      "phone": "",
+      "website": "https://newenglandlugandama.adventistchurch.org",
+      "source": "https://newenglandlugandama.adventistchurch.org",
+      "verified": false
+    },
+    {
+      "name": "Karibu Restaurant",
+      "category": "food",
+      "town": "Waltham",
+      "description": "Long-running East African spot just off Moody Street. Luwombo, matoke, chapati, samosas — no fancy menu, they tell you what is good today.",
+      "address": "10 Crescent St, Waltham, MA 02453",
+      "phone": "(781) 899-7444",
+      "website": "",
+      "source": "https://library.bu.edu/culturecuisinesubsahara/local",
+      "verified": false
+    },
+    {
+      "name": "Sentie’s Kitchen",
+      "category": "food",
+      "town": "Southborough",
+      "description": "Ugandan-owned takeout and catering by Chef Sentie. Matoke, goat pilau, rolex, kabalagala, and serious smoked barbecue. Caters parties too.",
+      "address": "21 Turnpike Rd, Southborough, MA 01772",
+      "phone": "(508) 927-8011",
+      "website": "",
+      "source": "https://www.bostonglobe.com/2026/11/08/metro/food-love-massachusetts-immigrants/",
+      "verified": false
+    },
+    {
+      "name": "Rhino Lounge",
+      "category": "food",
+      "town": "Waltham",
+      "description": "Restaurant, bar and lounge serving Ugandan and East African food. Also does catering and private events.",
+      "address": "11 Cooper St, Waltham, MA 02453",
+      "phone": "",
+      "website": "",
+      "source": "https://www.mapquest.com/us/massachusetts/rhino-lounge-375980976",
+      "verified": false
+    }
+  ],
+  "image": "/media/picnic.jpg"
+}

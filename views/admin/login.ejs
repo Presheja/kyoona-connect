@@ -1,0 +1,11 @@
+<%- include('../partials/head', { bodyClass: 'admin' }) %>
+<main class="admin-login">
+  <a class="brand" href="/"><span class="brand-main">KYO<span class="brand-flower">✺</span>NA</span><span class="brand-sub">CONNECT</span></a>
+  <form method="post" action="/admin/login" class="join-card">
+    <h1 class="join-title">Admin</h1>
+    <label class="field"><span>Password</span><input type="password" name="password" autofocus required></label>
+    <% if (error) { %><div class="form-errors"><%= error %></div><% } %>
+    <button class="btn btn-ink btn-block" type="submit">Log in</button>
+  </form>
+</main>
+</body></html>

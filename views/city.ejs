@@ -1,0 +1,56 @@
+<%- include('partials/head') %>
+<%- include('partials/header', { headerDark: true }) %>
+<main>
+  <section class="city-hero" style="--img:url('<%= city.image %>')">
+    <div class="shell">
+      <p class="eyebrow">Find your people</p>
+      <h1 class="display-title light">UGANDANS IN<br><span class="accent-yellow"><%= city.name.toUpperCase() %>.</span></h1>
+      <p class="script-big light"><%= city.tagline %></p>
+      <p class="lede light"><%= city.intro %></p>
+    </div>
+  </section>
+  <div class="city-toolbar">
+    <div class="shell toolbar-inner">
+      <div class="filter-bar" data-dir-filter>
+        <button class="chip is-on" data-cat="all">Everything <i><%= city.listings.length %></i></button>
+        <% [['community','Associations'],['faith','Churches & fellowships'],['food','Food & businesses'],['groups','WhatsApp & Facebook groups']].forEach(([k,l]) => { %>
+          <button class="chip" data-cat="<%= k %>" id="<%= k %>"><%= l %> <i><%= city.listings.filter(x => x.category === k).length %></i></button>
+        <% }) %>
+      </div>
+      <label class="search"><input type="search" placeholder="Search: Waltham, Luganda, food…" data-dir-search aria-label="Search listings"></label>
+    </div>
+  </div>
+  <section class="section tight">
+    <div class="shell">
+      <div class="dir-grid" data-dir-grid>
+        <% city.listings.forEach(l => { %>
+          <article class="dir-card c-<%= l.category %>" data-cat="<%= l.category %>" data-text="<%= (l.name + ' ' + l.town + ' ' + l.description).toLowerCase() %>">
+            <div class="dir-top"><span class="dir-cat"><%= { community: 'Association', faith: 'Church & fellowship', food: 'Food & business', groups: 'Group' }[l.category] %></span><span class="dir-town"><%= l.town %></span></div>
+            <h3><%= l.name %></h3>
+            <p><%= l.description %></p>
+            <ul class="dir-facts">
+              <% if (l.address) { %><li>● <%= l.address %></li><% } %>
+              <% if (l.phone) { %><li>☎ <a href="tel:<%= l.phone.replace(/[^\d+]/g,'') %>"><%= l.phone %></a></li><% } %>
+              <% if (l.website) { %><li>↗ <a href="<%= l.website %>" target="_blank" rel="noopener"><%= l.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') %></a></li><% } %>
+            </ul>
+            <div class="dir-foot">
+              <span class="badge <%= l.verified ? 'ok' : 'check' %>"><%= l.verified ? 'Confirmed' : 'Not yet confirmed' %></span>
+              <a href="mailto:<%= contact %>?subject=<%= encodeURIComponent('Update listing: ' + l.name) %>">Is this yours?</a>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+      <div class="empty-note" data-dir-empty hidden>
+        <strong>Know one we're missing?</strong> WhatsApp and Facebook groups live in people's phones, not on Google. If you run one that welcomes newcomers, <a class="text-link" href="mailto:<%= contact %>?subject=Add%20a%20listing">tell us</a>.
+      </div>
+      <p class="fine">"Not yet confirmed" listings come from public sources, last checked <%= city.lastChecked %>. Spot something wrong? Tap "Is this yours?" and we'll fix it.</p>
+    </div>
+  </section>
+  <section class="join-strip-wrap">
+    <div class="shell join-strip">
+      <div><h2>NEW HERE? DON'T BE A STRANGER.</h2><p>Join the community and we'll let you know when the next gathering is on.</p></div>
+      <a class="btn btn-primary" href="/join">Join the community <span class="arrow-circle">↗</span></a>
+    </div>
+  </section>
+</main>
+<%- include('partials/footer') %>

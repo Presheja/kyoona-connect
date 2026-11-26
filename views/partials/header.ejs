@@ -1,0 +1,13 @@
+<header class="site-header <%= typeof headerDark !== 'undefined' && headerDark ? 'on-dark' : '' %>">
+  <a class="brand" href="/" aria-label="Kyoona Connect home">
+    <span class="brand-main">KYO<span class="brand-flower">✺</span>NA</span>
+    <span class="brand-sub">CONNECT</span>
+  </a>
+  <nav class="nav" id="nav" aria-label="Main">
+    <a class="nav-link <%= path.startsWith('/events') ? 'active' : '' %>" href="/events">Events</a>
+    <a class="nav-link <%= path.startsWith('/cities') ? 'active' : '' %>" href="/cities/boston">Find your people</a>
+    <a class="nav-link <%= path === '/about' ? 'active' : '' %>" href="/about">About</a>
+    <a class="nav-join" href="/join">Join the community <span class="arrow-circle">↗</span></a>
+  </nav>
+  <button class="menu-dots" type="button" aria-label="Menu" aria-controls="nav" aria-expanded="false">•••</button>
+</header>
