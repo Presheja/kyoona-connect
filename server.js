@@ -94,8 +94,9 @@ app.get("/events", wrap(async (req, res) => {
 app.get("/events/:slug", wrap(async (req, res, next) => {
   const ev = await content.event(req.params.slug);
   if (!ev) return next();
+  const hostOrg = ev.orgId ? await records.get("org", ev.orgId) : null;
   res.render("event", {
-    ev,
+    ev, hostOrg: hostOrg && hostOrg.status !== "hidden" ? hostOrg : null,
     more: (await content.upcoming()).filter(e => e.slug !== ev.slug).slice(0, 3),
     meta: { title: `${ev.title} — Kyoona Connect`, description: ev.description, image: ev.image || "/media/og-image.jpg" }
   });

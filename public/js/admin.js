@@ -89,3 +89,24 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("kc:images", sync);
   }
 });
+
+// Organization editor: add / remove other locations (branches)
+document.querySelectorAll("[data-branches]").forEach(sec => {
+  const list = sec.querySelector("[data-branch-list]"), add = sec.querySelector("[data-branch-add]"), tpl = sec.querySelector("[data-branch-template]");
+  const max = Number(sec.dataset.max || 3);
+  let next = list.children.length + 100; // unique index for new rows; the server only reads the values
+  const refresh = () => { add.hidden = list.querySelectorAll("[data-branch]").length >= max; };
+  add.addEventListener("click", () => {
+    list.insertAdjacentHTML("beforeend", tpl.innerHTML.replace(/__N__/g, next++));
+    const f = list.lastElementChild.querySelector("input"); if (f) f.focus();
+    sec.closest("form").dispatchEvent(new Event("input", { bubbles: true }));
+    refresh();
+  });
+  list.addEventListener("click", e => {
+    const b = e.target.closest("[data-branch-remove]"); if (!b) return;
+    b.closest("[data-branch]").remove();
+    sec.closest("form").dispatchEvent(new Event("input", { bubbles: true }));
+    refresh();
+  });
+  refresh();
+});

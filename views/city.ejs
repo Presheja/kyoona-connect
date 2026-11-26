@@ -37,16 +37,17 @@
     <p class="org-label">Organizations</p>
     <div class="org-grid" data-org-grid>
       <% dir.listings.forEach((l, i) => { const img = (l.images || [])[0]; %>
-        <article class="org-card" style="<%= catStyle(l.category) %>" data-cat="<%= l.category %>" data-state="<%= l.state %>" data-text="<%= (l.name + ' ' + l.location + ' ' + (STATES[l.state] || '') + ' ' + l.description).toLowerCase() %>">
+        <article class="org-card" id="org-<%= l.id %>" style="<%= catStyle(l.category) %>" data-cat="<%= l.category %>" data-state="<%= l.states.join(' ') %>" data-text="<%= (l.name + ' ' + l.locations.map(x => x.location + ' ' + (STATES[x.state] || '')).join(' ') + ' ' + l.description).toLowerCase() %>">
           <button class="org-img" type="button" data-open="<%= i %>" aria-label="View <%= l.name %>">
             <% if (img) { %><img src="<%= img %>" alt="" loading="lazy" onerror="this.remove()"><% } %>
-            <span class="org-town"><%= l.location %></span>
+            <span class="org-town"><%= l.location %><% if (l.locations.length > 1) { %> +<%= l.locations.length - 1 %><% } %></span>
+            <% if (l.events.length) { %><span class="org-next"><%- icon('calendar', 13) %><%= l.events[0].dateConfirmed ? l.events[0].month + ' ' + l.events[0].day : 'Event coming up' %><%= l.events.length > 1 ? ' +' + (l.events.length - 1) : '' %></span><% } %>
             <% if ((l.images || []).length > 1) { %><span class="org-count"><%= l.images.length %> photos</span><% } %>
           </button>
           <div class="org-info">
             <span class="org-cat"><%= CAT[l.category] %></span>
             <h3><%= l.name %></h3>
-            <p class="org-where"><%= l.address ? l.address + ', ' + l.location : l.location %></p>
+            <p class="org-where"><%= l.address ? l.address + ', ' + l.location : l.location %><% if (l.locations.length > 1) { %><br><span class="org-more">+ <%= l.locations.length - 1 %> more location<%= l.locations.length > 2 ? 's' : '' %>: <%= l.locations.slice(1).map(x => x.location).join(' · ') %></span><% } %></p>
             <p class="org-desc"><%= l.description %></p>
             <div class="org-foot">
               <span class="org-status <%= l.verified ? 'ok' : '' %>"><%= l.verified ? 'Confirmed' : 'Details being confirmed' %></span>
@@ -91,10 +92,13 @@
     <h2 id="om-title" data-om-name></h2>
     <p class="om-desc" data-om-desc></p>
     <ul class="om-rows">
+      <li class="om-evs" data-om-ev-row><span class="om-lbl" data-om-ev-title>Upcoming events</span><div data-om-evs></div></li>
       <li data-om-meets-row><span class="om-lbl">Meets / opens</span><strong data-om-meets></strong></li>
       <li data-om-addr-row><span class="om-lbl">Address</span><strong data-om-addr></strong><a class="om-btn" data-om-map target="_blank" rel="noopener"><%- icon('pin', 15) %>Open in Maps</a></li>
+      <li class="om-locs" data-om-locs-row><span class="om-lbl" data-om-locs-title>Locations</span><div data-om-locs></div></li>
       <li data-om-phone-row><span class="om-lbl">Phone</span><a class="om-btn" data-om-phone-link><%- icon('phone', 15) %><span data-om-phone></span></a></li>
-      <li data-om-web-row><span class="om-lbl">Website</span><a class="om-btn" data-om-web-link target="_blank" rel="noopener"><%- icon('globe', 15) %><span data-om-web></span></a></li>
+      <li data-om-web-row><span class="om-lbl" data-om-web-title>Website</span><div class="om-btns" data-om-webs></div></li>
+      <template data-om-globe><%- icon('globe', 15) %></template>
     </ul>
     <a class="om-update" data-om-update>Is this yours? Update the details</a>
   </div>
@@ -102,7 +106,9 @@
 
 <script type="application/json" id="org-data"><%- JSON.stringify(dir.listings.map(l => ({
   name: l.name, cat: CAT[l.category], town: l.location, description: l.description,
-  address: l.fullAddress, meets: l.meets || '', phone: l.phone, website: l.website, images: (l.images || []).slice(0, 4),
+  address: l.fullAddress, meets: l.meets || '',
+  locations: l.locations.length > 1 ? l.locations.map(x => ({ label: x.label, address: x.fullAddress || x.location, meets: x.meets, map: x.mapLink })) : [], phone: l.phone, websites: [[l.website, l.websiteLabel], [l.altWebsite, l.altWebsiteLabel]].filter(([u]) => u).map(([url, label]) => ({ url, label: label || '' })), images: (l.images || []).slice(0, 4),
+  id: l.id, events: l.events.slice(0, 3).map(e => ({ title: e.title, date: e.dateLabel, time: e.time || '', where: e.location || '', url: '/events/' + e.slug })), moreEvents: Math.max(0, l.events.length - 3),
   representative: !!l.photosRepresentative, map: l.mapLink,
   update: '/submit/update?org=' + encodeURIComponent(l.id || '')
 }))).replace(/</g, '\\u003c') %></script>

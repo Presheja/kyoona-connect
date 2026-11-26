@@ -16,7 +16,7 @@
       <tr>
         <td><a class="who" href="/admin/organizations/<%= o.id %>/edit"><span class="sq" <% if ((o.images||[])[0]) { %>style="background-image:url('<%= o.images[0] %>')"<% } %>></span><div><strong><%= o.name %></strong><small><%= o.streetLine || '—' %></small></div></a></td>
         <td><%= (cats.find(c => c[0] === o.category) || [,''])[1] %></td>
-        <td><%= o.location || '—' %><% if (!o.town || !o.state) { %> <span class="pill st-pending">incomplete</span><% } %></td>
+        <td><%= o.location || '—' %><% if (o.locations.length > 1) { %> <span class="pill st-confirmed">+<%= o.locations.length - 1 %> location<%= o.locations.length > 2 ? 's' : '' %></span><% } %><% if (!o.town || !o.state) { %> <span class="pill st-pending">incomplete</span><% } %></td>
         <td><%= (o.images || []).length %>/4<%= o.photosRepresentative ? ' · stock' : '' %></td>
         <td>
           <span class="pill <%= o.verified ? 'st-confirmed' : 'st-pending' %>"><%= o.verified ? 'Confirmed' : 'To confirm' %></span>

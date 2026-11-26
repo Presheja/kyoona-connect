@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const st = stateSel ? stateSel.value : "all";
       let shown = 0;
       grid.querySelectorAll(".org-card").forEach(c => {
-        const ok = (cat === "all" || c.dataset.cat === cat) && (st === "all" || c.dataset.state === st) && (!q || c.dataset.text.includes(q));
+        const ok = (cat === "all" || c.dataset.cat === cat) && (st === "all" || c.dataset.state.split(" ").includes(st)) && (!q || c.dataset.text.includes(q));
         c.hidden = !ok; if (ok) shown++;
       });
       empty.hidden = shown > 0;
@@ -82,10 +82,48 @@ document.addEventListener("DOMContentLoaded", () => {
       $("[data-om-addr]").textContent = o.address || o.town;
       $("[data-om-map]").href = o.map;
       show("[data-om-meets-row]", !!o.meets); $("[data-om-meets]").textContent = o.meets || "";
+      // More than one location: one block per location (name, address, meets / opens, Open in Maps)
+      const many = (o.locations || []).length > 1;
+      show("[data-om-locs-row]", many);
+      if (many) {
+        show("[data-om-meets-row]", false); show("[data-om-addr-row]", false);
+        $("[data-om-locs-title]").textContent = o.locations.length + " locations";
+        const box = $("[data-om-locs]"); box.innerHTML = "";
+        const pin = $("[data-om-map] svg");
+        o.locations.forEach(x => {
+          const d = document.createElement("div"); d.className = "om-loc";
+          const add = (tag, cls, text) => { if (!text) return; const e = document.createElement(tag); e.className = cls; e.textContent = text; d.appendChild(e); };
+          add("span", "om-loc-name", x.label); add("strong", "om-loc-addr", x.address); add("span", "om-loc-meets", x.meets);
+          const a = document.createElement("a"); a.className = "om-btn"; a.href = x.map; a.target = "_blank"; a.rel = "noopener";
+          if (pin) a.appendChild(pin.cloneNode(true)); a.appendChild(document.createTextNode("Open in Maps")); d.appendChild(a);
+          box.appendChild(d);
+        });
+      } else show("[data-om-addr-row]", true);
       show("[data-om-phone-row]", !!o.phone);
       if (o.phone) { $("[data-om-phone]").textContent = o.phone; $("[data-om-phone-link]").href = "tel:" + o.phone.replace(/[^\d+]/g, ""); }
-      show("[data-om-web-row]", !!o.website);
-      if (o.website) { $("[data-om-web]").textContent = o.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""); $("[data-om-web-link]").href = o.website; }
+      // One or two website buttons, each shows its label or else the web address
+      const webs = o.websites || [];
+      show("[data-om-web-row]", webs.length > 0);
+      $("[data-om-web-title]").textContent = webs.length > 1 ? "Websites" : "Website";
+      const wbox = $("[data-om-webs]"); wbox.innerHTML = "";
+      webs.forEach(w => {
+        const a = document.createElement("a"); a.className = "om-btn"; a.href = w.url; a.target = "_blank"; a.rel = "noopener";
+        a.innerHTML = $("[data-om-globe]").innerHTML;
+        const t = document.createElement("span"); t.textContent = w.label || w.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""); a.appendChild(t);
+        wbox.appendChild(a);
+      });
+      // Upcoming events this organization is hosting
+      const evs = o.events || [];
+      show("[data-om-ev-row]", evs.length > 0);
+      $("[data-om-ev-title]").textContent = evs.length === 1 ? "Upcoming event" : "Upcoming events";
+      const ebox = $("[data-om-evs]"); ebox.innerHTML = "";
+      evs.forEach(e => {
+        const a = document.createElement("a"); a.className = "om-ev"; a.href = e.url;
+        const t = document.createElement("strong"); t.textContent = e.title; a.appendChild(t);
+        const m = document.createElement("span"); m.textContent = [e.date, e.time, e.where].filter(Boolean).join(" · "); a.appendChild(m);
+        ebox.appendChild(a);
+      });
+      if (o.moreEvents) { const a = document.createElement("a"); a.className = "om-ev-more"; a.href = "/events"; a.textContent = `+ ${o.moreEvents} more on the Events page`; ebox.appendChild(a); }
       $("[data-om-update]").href = o.update;
       $("[data-om-note]").hidden = !o.representative || !o.images.length;
       const main = $("[data-om-main]"), thumbs = $("[data-om-thumbs]");
@@ -96,6 +134,8 @@ document.addEventListener("DOMContentLoaded", () => {
       modal.showModal();
     };
     document.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => open(+b.dataset.open)));
+    // Links like /find-your-people#org-<id> (from an event page) open that organization's popup
+    if (location.hash.startsWith("#org-")) { const k = data.findIndex(o => "org-" + o.id === location.hash.slice(1)); if (k > -1) open(k); }
     $("[data-close]").addEventListener("click", () => modal.close());
     modal.addEventListener("click", e => { if (e.target === modal) modal.close(); });
   }

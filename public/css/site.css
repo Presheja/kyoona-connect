@@ -534,3 +534,25 @@ th{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--so
 .fp-form .field select{font:inherit;font-size:1rem;font-weight:500;padding:.9rem 1rem;border-radius:14px;border:2px solid var(--line);background:var(--paper);color:var(--text)}
 .fp-note{margin:-.4rem 0 -.3rem;color:var(--soft);font-size:.9rem}
 @media (max-width:760px){.field-row.three{grid-template-columns:1fr}}
+
+/* ---------- organizations with more than one location ---------- */
+.org-more{font-size:.78rem;font-weight:600;color:var(--cat-text,var(--coral))}
+.om-rows li.om-locs{flex-direction:column;gap:.6rem}
+.om-locs > div{display:grid;gap:.6rem;width:100%}
+.om-loc{display:flex;flex-direction:column;align-items:flex-start;gap:.3rem;background:#fff;border-radius:12px;padding:.8rem .9rem}
+.om-loc-name{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--coral)}
+.om-loc-addr{color:var(--ink);font-size:.9rem;font-weight:600}
+.om-loc-meets{font-size:.82rem;color:var(--soft)}
+.om-loc .om-btn{margin-top:.2rem}
+.om-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.om-btns .om-btn{margin-top:.15rem}
+
+/* ---------- organization events ---------- */
+.org-next{position:absolute;bottom:.7rem;left:.7rem;display:inline-flex;align-items:center;gap:.35rem;background:var(--yellow);color:var(--ink);font-size:.72rem;font-weight:800;padding:.3rem .65rem;border-radius:999px}
+.om-rows li.om-evs{flex-direction:column;gap:.5rem;background:#fff4d6}
+.om-evs > div{display:grid;gap:.45rem;width:100%}
+.om-ev{display:flex;flex-direction:column;gap:.15rem;background:#fff;border-radius:12px;padding:.7rem .9rem;text-decoration:none;border:1.5px solid transparent;transition:border-color .2s}
+.om-ev:hover{border-color:var(--coral)}
+.om-ev strong{color:var(--ink);font-size:.92rem}
+.om-ev span{color:var(--soft);font-size:.8rem}
+.om-ev-more{font-size:.8rem;font-weight:700;color:var(--coral)}

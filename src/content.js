@@ -39,17 +39,31 @@ const HOME_STATE = "MA";
 function withLocation(o) {
   const state = o.state || (o.city === "boston" ? HOME_STATE : "");
   const r = { ...o, state };
-  return { ...r, location: L.shortLocation(r), streetLine: [r.address, L.cityLine(r)].filter(Boolean).join(", "), fullAddress: L.fullAddress(r), mapLink: L.mapUrl(r, r.name) };
+  const base = { ...r, location: L.shortLocation(r), streetLine: [r.address, L.cityLine(r)].filter(Boolean).join(", "), fullAddress: L.fullAddress(r), mapLink: L.mapUrl(r, r.name) };
+  // Every place this organization can be found: the main location first, then its other locations (branches).
+  const one = (x, label) => ({ label, placeName: x.placeName || "", address: x.address || "", town: x.town || "", state: x.state || "", zip: x.zip || "", meets: x.meets || "",
+    location: L.shortLocation(x), fullAddress: L.fullAddress(x), mapLink: L.mapUrl(x, r.name) });
+  const branches = (r.branches || []).filter(x => x && (x.town || x.address));
+  base.locations = [one(r, r.mainLabel || (branches.length ? "Main location" : "")), ...branches.map((x, i) => one(x, x.label || x.town || "Location " + (i + 2)))];
+  base.states = [...new Set(base.locations.map(x => x.state).filter(Boolean))];
+  return base;
 }
 async function allOrgs() {
   return (await records.list("org")).map(withLocation)
     .sort((a, b) => (a.state === HOME_STATE ? 0 : 1) - (b.state === HOME_STATE ? 0 : 1) || (a.order ?? 999) - (b.order ?? 999) || a.name.localeCompare(b.name));
 }
 // Everything shown on Find your people, home state first.
+// Upcoming published events grouped by the organization hosting them (event.orgId)
+async function eventsByOrg() {
+  const map = {};
+  (await upcoming()).forEach(e => { if (e.orgId) (map[e.orgId] = map[e.orgId] || []).push(e); });
+  return map;
+}
 async function directory() {
-  const listings = (await allOrgs()).filter(o => o.status !== "hidden");
-  const states = [...new Set(listings.map(o => o.state).filter(Boolean))].sort((a, b) => (a === HOME_STATE ? -1 : b === HOME_STATE ? 1 : a.localeCompare(b)));
+  const byOrg = await eventsByOrg();
+  const listings = (await allOrgs()).filter(o => o.status !== "hidden").map(o => ({ ...o, events: byOrg[o.id] || [] }));
+  const states = [...new Set(listings.flatMap(o => o.states))].sort((a, b) => (a === HOME_STATE ? -1 : b === HOME_STATE ? 1 : a.localeCompare(b)));
   return { listings, states };
 }
 
-module.exports = { decorate, allEvents, events, upcoming, event, allOrgs, directory };
+module.exports = { decorate, allEvents, events, upcoming, event, allOrgs, directory, eventsByOrg };

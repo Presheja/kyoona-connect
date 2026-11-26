@@ -9,7 +9,6 @@
         <label class="fld"><span>Type</span><select name="category"><% cats.forEach(([k,l]) => { %><option value="<%= k %>" <%= org.category === k ? 'selected' : '' %>><%= l %></option><% }) %></select></label>
       </div>
       <label class="fld"><span>Description</span><textarea name="description" rows="4" placeholder="What it is, who it's for, when they meet."><%= org.description %></textarea><small>The first two lines show on the card. The full text shows in the popup.</small></label>
-      <label class="fld"><span>Meets / opens</span><input name="meets" value="<%= org.meets || '' %>" placeholder="Tue-Sun 11am-9pm" maxlength="60"></label>
     </section>
 
     <section class="adm-card fsec">
@@ -24,12 +23,51 @@
     </section>
 
     <section class="adm-card fsec">
-      <h2>Location &amp; contact</h2>
+      <h2>Main location &amp; contact</h2>
+      <div class="row2">
+        <label class="fld"><span>What is this location?</span><input name="mainLabel" value="<%= org.mainLabel || '' %>" maxlength="40" placeholder="Headquarters"><small>Optional. Only shows when they have other locations too.</small></label>
+        <label class="fld"><span>Meets / opens</span><input name="meets" value="<%= org.meets || '' %>" placeholder="Tue-Sun 11am-9pm" maxlength="60"></label>
+      </div>
       <%- include('partials/location-fields', { o: org, placeKey: 'placeName', placeLabel: 'Building / place name', placeHint: 'e.g. Covenant Church (if they meet in another building)' }) %>
       <div class="row2">
         <label class="fld"><span>Phone</span><input name="phone" value="<%= org.phone %>"></label>
         <label class="fld"><span>Website</span><input name="website" value="<%= org.website %>" placeholder="https://..."></label>
       </div>
+      <div class="row2">
+        <label class="fld"><span>Website label</span><input name="websiteLabel" value="<%= org.websiteLabel || '' %>" maxlength="30" placeholder="Parish"><small>Optional. Shown on the button instead of the web address.</small></label>
+        <span></span>
+      </div>
+      <div class="row2">
+        <label class="fld"><span>Second website</span><input name="altWebsite" value="<%= org.altWebsite || '' %>" placeholder="https://..."></label>
+        <label class="fld"><span>Second website label</span><input name="altWebsiteLabel" value="<%= org.altWebsiteLabel || '' %>" maxlength="30" placeholder="Priests &amp; sisters"></label>
+      </div>
+    </section>
+
+    <section class="adm-card fsec" data-branches data-max="3">
+      <h2>Other locations <small class="muted">offices or branches, up to 3</small></h2>
+      <div data-branch-list>
+        <% (org.branches || []).forEach((br, i) => { %>
+        <div class="branch" data-branch>
+          <div class="branch-head"><strong>Location <%= i + 2 %></strong><button class="ab ab-danger" type="button" data-branch-remove aria-label="Remove this location"><%- icon('trash', 15) %></button></div>
+          <div class="row2">
+            <label class="fld"><span>What is this location?</span><input name="branches[<%= i %>][label]" value="<%= br.label || '' %>" maxlength="40" placeholder="Office, Worcester branch..."></label>
+            <label class="fld"><span>Meets / opens</span><input name="branches[<%= i %>][meets]" value="<%= br.meets || '' %>" maxlength="60" placeholder="Sun 2pm"></label>
+          </div>
+          <%- include('partials/location-fields', { o: { ...br, name: org.name }, prefix: 'branches[' + i + ']', placeKey: 'placeName', placeLabel: 'Building / place name', placeHint: 'Optional' }) %>
+        </div>
+        <% }) %>
+      </div>
+      <button class="ab" type="button" data-branch-add><%- icon('plus', 15) %>Add another location</button>
+      <template data-branch-template>
+        <div class="branch" data-branch>
+          <div class="branch-head"><strong>New location</strong><button class="ab ab-danger" type="button" data-branch-remove aria-label="Remove this location"><%- icon('trash', 15) %></button></div>
+          <div class="row2">
+            <label class="fld"><span>What is this location?</span><input name="branches[__N__][label]" maxlength="40" placeholder="Office, Worcester branch..."></label>
+            <label class="fld"><span>Meets / opens</span><input name="branches[__N__][meets]" maxlength="60" placeholder="Sun 2pm"></label>
+          </div>
+          <%- include('partials/location-fields', { o: {}, prefix: 'branches[__N__]', placeKey: 'placeName', placeLabel: 'Building / place name', placeHint: 'Optional' }) %>
+        </div>
+      </template>
     </section>
   </div>
   <aside class="form-side">
@@ -40,6 +78,16 @@
       <button class="ab ab-coral wide" type="submit"><%- icon('check', 16) %>Save organization</button>
       <a class="ab wide" href="/admin/organizations">Cancel</a>
     </div>
+    <% if (!isNew) { %>
+    <div class="adm-card org-events">
+      <h2>Events</h2>
+      <% if (!linked.length) { %><p class="muted">No events linked yet.</p><% } %>
+      <% linked.forEach(e => { %>
+        <a class="oe-row <%= e.past ? 'is-past' : '' %>" href="/admin/events/<%= e.id %>/edit"><span class="oe-date"><%= e.month %> <%= e.day %></span><span class="oe-title"><%= e.title %><small><%= e.past ? 'Past' : e.status === 'published' ? 'Published' : 'Draft' %></small></span></a>
+      <% }) %>
+      <a class="ab wide" href="/admin/events/new?org=<%= org.id %>"><%- icon('plus', 15) %>Add an event for them</a>
+    </div>
+    <% } %>
   </aside>
 </form>
 <%- include('partials/bottom') %>

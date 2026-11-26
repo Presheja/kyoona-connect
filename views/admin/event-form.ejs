@@ -48,8 +48,12 @@
 
     <section class="adm-card fsec">
       <h2>Organizer</h2>
+      <label class="fld"><span>Organization on Kyoona Connect</span><select name="orgId">
+        <option value="">Not linked (person or organization not listed)</option>
+        <% (orgs || []).forEach(o => { %><option value="<%= o.id %>" <%= ev.orgId === o.id ? 'selected' : '' %>><%= o.name %><%= o.hidden ? ' (hidden)' : '' %></option><% }) %>
+      </select><small>Linked events show in that organization's popup on Find your people, and the event page links back to it.</small></label>
       <div class="row3">
-        <label class="fld"><span>Hosted by</span><input name="host" value="<%= ev.host %>" placeholder="Organization or person"></label>
+        <label class="fld"><span>Hosted by</span><input name="host" value="<%= ev.host %>" placeholder="Filled from the organization if left blank"></label>
         <label class="fld"><span>Contact email</span><input name="contactEmail" type="email" value="<%= ev.contactEmail %>"></label>
         <label class="fld"><span>Contact phone</span><input name="contactPhone" value="<%= ev.contactPhone %>"></label>
       </div>

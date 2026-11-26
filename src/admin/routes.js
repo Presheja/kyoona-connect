@@ -131,7 +131,7 @@ module.exports = function adminRouter({ store, records, content, mailer, cats, C
       await records.put("event", id, {
         slug: id, title: d.title, subtitle: "", kicker: "", category: cats.has("event", d.category) ? d.category : cats.first("event"), status: "draft", featured: false,
         date: d.date, time: d.time, dateConfirmed: true, venue: d.venue, address: d.address, town: d.town || "", state: d.state || "", zip: d.zip || "", locVersion: 1,
-        host: d.host || d.name, contactEmail: d.email, contactPhone: d.phone, price: d.price || "See details", ticketUrl: d.ticketUrl,
+        host: d.host || d.name, orgId: await matchOrg(d.host), contactEmail: d.email, contactPhone: d.phone, price: d.price || "See details", ticketUrl: d.ticketUrl,
         art: "purple", image: d.image || "", description: d.description, fromSubmission: s.id
       });
       await records.put("submission", s.id, { ...s, status: "approved", result: `/admin/events/${id}/edit`, decidedAt: new Date().toISOString() });
@@ -190,11 +190,18 @@ module.exports = function adminRouter({ store, records, content, mailer, cats, C
     page(res, "events", "events", { list, f, q: req.query.q || "", counts, interests: cats.list("event") });
   }));
   const blankEvent = () => ({ title: "", subtitle: "", kicker: "", category: cats.first("event"), status: "draft", featured: false, date: "", time: "", dateConfirmed: true, town: "", state: "MA", zip: "", venue: "", address: "", host: "", contactEmail: "", contactPhone: "", price: "", ticketUrl: "", art: "purple", image: "", description: "" });
-  r.get("/events/new", (req, res) => page(res, "event-form", "events", { ev: blankEvent(), isNew: true, interests: cats.list("event") }));
+  const orgChoices = async () => (await records.list("org")).map(o => ({ id: o.id, name: o.name, hidden: o.status === "hidden" })).sort((a, b) => a.name.localeCompare(b.name));
+  // Match a typed "Hosted by" name to a listed organization (used when approving a submitted event)
+  const matchOrg = async name => { const n = String(name || "").trim().toLowerCase(); return n ? ((await records.list("org")).find(o => o.name.toLowerCase() === n || o.name.toLowerCase().startsWith(n + " (")) || {}).id || "" : ""; };
+  r.get("/events/new", wrap(async (req, res) => {
+    const orgs = await orgChoices();
+    const pre = orgs.find(o => o.id === req.query.org);
+    page(res, "event-form", "events", { ev: { ...blankEvent(), orgId: pre ? pre.id : "", host: pre ? pre.name : "" }, isNew: true, interests: cats.list("event"), orgs });
+  }));
   r.get("/events/:id/edit", wrap(async (req, res, next) => {
     const ev = await records.get("event", req.params.id);
     if (!ev) return next();
-    page(res, "event-form", "events", { ev: { ...blankEvent(), ...ev, state: ev.state || (ev.city === "boston" ? "MA" : "") }, isNew: false, interests: cats.list("event") });
+    page(res, "event-form", "events", { ev: { ...blankEvent(), ...ev, state: ev.state || (ev.city === "boston" ? "MA" : "") }, isNew: false, interests: cats.list("event"), orgs: await orgChoices() });
   }));
   r.post("/events/save", wrap(async (req, res) => {
     const b = req.body;
@@ -216,7 +223,8 @@ module.exports = function adminRouter({ store, records, content, mailer, cats, C
       status: ["draft", "published", "cancelled"].includes(b.status) ? b.status : "draft",
       featured: b.featured === "on", date: b.date, time: (b.time || "").trim(), dateConfirmed: b.dateConfirmed === "on",
       venue: loc.placeName, address: loc.address, town: loc.town, state: loc.state, zip: loc.zip, locVersion: 1,
-      host: (b.host || "").trim(), contactEmail: (b.contactEmail || "").trim(), contactPhone: (b.contactPhone || "").trim(),
+      orgId: b.orgId && (await records.get("org", b.orgId)) ? b.orgId : "",
+      host: (b.host || "").trim() || (b.orgId ? ((await records.get("org", b.orgId)) || {}).name || "" : ""), contactEmail: (b.contactEmail || "").trim(), contactPhone: (b.contactPhone || "").trim(),
       price: (b.price || "").trim() || "See details", ticketUrl: /^https?:\/\//.test(b.ticketUrl || "") ? b.ticketUrl.trim() : "",
       art: ["purple", "gold", "magenta", "teal"].includes(b.art) ? b.art : "purple",
       image: cover[0] || "", description: (b.description || "").trim()
@@ -261,8 +269,10 @@ module.exports = function adminRouter({ store, records, content, mailer, cats, C
   r.get("/organizations/:id/edit", wrap(async (req, res, next) => {
     const org = await records.get("org", req.params.id);
     if (!org) return next();
-    page(res, "org-form", "organizations", { org: { ...blankOrg(), ...org, state: org.state || (org.city === "boston" ? "MA" : "") }, isNew: false, cats: ORG_CATS() });
+    const linked = (await content.allEvents()).filter(e => e.orgId === org.id).sort((a, b) => (a.past - b.past) || String(a.date).localeCompare(String(b.date)));
+    page(res, "org-form", "organizations", { org: { ...blankOrg(), ...org, state: org.state || (org.city === "boston" ? "MA" : "") }, isNew: false, cats: ORG_CATS(), linked });
   }));
+  const toUrl = v => { v = String(v || "").trim(); return !v ? "" : /^https?:\/\//i.test(v) ? v : "https://" + v; };
   r.post("/organizations/save", wrap(async (req, res) => {
     const b = req.body;
     const name = String(b.name || "").trim();
@@ -272,12 +282,24 @@ module.exports = function adminRouter({ store, records, content, mailer, cats, C
     const old = (await records.get("org", id)) || {};
     const { loc, errors: locErrors } = L.fromForm(b);
     if (locErrors.length) return fail(res, b.id ? `/admin/organizations/${b.id}/edit` : "/admin/organizations/new", locErrors.join(" "));
+    // Other locations (branches): up to 3, each needs a city and state
+    const branches = [];
+    for (const br of Object.values(b.branches || {})) {
+      if (!br || ![br.placeName, br.address, br.town, br.zip].some(v => String(v || "").trim())) continue;
+      const { loc: bl, errors: be } = L.fromForm(br, { requireTownState: true });
+      const label = String(br.label || "").trim().slice(0, 40);
+      if (be.length) return fail(res, b.id ? `/admin/organizations/${b.id}/edit` : "/admin/organizations/new", `Other location "${label || bl.town || "unnamed"}": ${be.join(" ")}`);
+      branches.push({ label, ...bl, meets: String(br.meets || "").trim().slice(0, 60) });
+    }
+    if (branches.length > 3) branches.length = 3;
     const images = await keepImages(b.images, 4);
     const org = {
       ...old, name,
       category: cats.has("org", b.category) ? b.category : cats.first("org"),
       placeName: loc.placeName, address: loc.address, town: loc.town, state: loc.state, zip: loc.zip, locVersion: 1,
-      phone: (b.phone || "").trim(), website: /^https?:\/\//.test(b.website || "") ? b.website.trim() : (b.website ? "https://" + b.website.trim() : ""),
+      mainLabel: String(b.mainLabel || "").trim().slice(0, 40), branches,
+      phone: (b.phone || "").trim(), website: toUrl(b.website), websiteLabel: String(b.websiteLabel || "").trim().slice(0, 30),
+      altWebsite: toUrl(b.altWebsite), altWebsiteLabel: String(b.altWebsiteLabel || "").trim().slice(0, 30),
       description: (b.description || "").trim(), meets: (b.meets || "").trim().slice(0, 60), images,
       photosRepresentative: b.photosRepresentative === "on", verified: b.verified === "on",
       status: b.status === "hidden" ? "hidden" : "published", order: old.order ?? 999
@@ -293,6 +315,8 @@ module.exports = function adminRouter({ store, records, content, mailer, cats, C
     go(res, "/admin/organizations?f=" + (req.body.f || "all"), "Updated.");
   }));
   r.post("/organizations/:id/delete", wrap(async (req, res) => {
+    // Unlink its events (they stay, just without a host organization)
+    for (const e of await records.list("event")) if (e.orgId === req.params.id) await records.put("event", e.id, { ...e, orgId: "" });
     await records.del("org", req.params.id);
     go(res, "/admin/organizations", "Organization deleted.");
   }));
@@ -301,16 +325,17 @@ module.exports = function adminRouter({ store, records, content, mailer, cats, C
   const csvCell = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
   r.get("/organizations.csv", wrap(async (req, res) => {
     const rows = await content.allOrgs();
-    const head = ["id", "name", "category", "place_name", "street", "city", "state", "zip", "phone", "website", "meets", "verified", "status", "photos", "updated"];
-    const csv = [head.join(",")].concat(rows.map(o => [o.id, o.name, o.category, o.placeName, o.address, o.town, o.state, o.zip, o.phone, o.website, o.meets, o.verified ? "yes" : "no", o.status || "published", (o.images || []).length, o.updatedAt].map(csvCell).join(","))).join("\n");
+    // One row per location, so an organization with a headquarters and an office gives two rows with the same id
+    const head = ["id", "name", "category", "location_no", "location_label", "place_name", "street", "city", "state", "zip", "meets", "phone", "website", "website_label", "website_2", "website_2_label", "verified", "status", "photos", "updated"];
+    const csv = [head.join(",")].concat(rows.flatMap(o => o.locations.map((x, i) => [o.id, o.name, o.category, i + 1, x.label, x.placeName, x.address, x.town, x.state, x.zip, x.meets, o.phone, o.website, o.websiteLabel, o.altWebsite, o.altWebsiteLabel, o.verified ? "yes" : "no", o.status || "published", (o.images || []).length, o.updatedAt].map(csvCell).join(",")))).join("\n");
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", "attachment; filename=kyoona-organizations.csv");
     res.send(csv);
   }));
   r.get("/events.csv", wrap(async (req, res) => {
     const rows = await content.allEvents();
-    const head = ["id", "title", "category", "status", "date", "time", "date_confirmed", "venue", "street", "city", "state", "zip", "host", "price", "ticket_url", "featured"];
-    const csv = [head.join(",")].concat(rows.map(e => [e.id, e.title, e.category, e.status, e.date, e.time, e.dateConfirmed ? "yes" : "no", e.venue, e.address, e.town, e.state, e.zip, e.host, e.price, e.ticketUrl, e.featured ? "yes" : "no"].map(csvCell).join(","))).join("\n");
+    const head = ["id", "title", "category", "status", "date", "time", "date_confirmed", "venue", "street", "city", "state", "zip", "host", "org_id", "price", "ticket_url", "featured"];
+    const csv = [head.join(",")].concat(rows.map(e => [e.id, e.title, e.category, e.status, e.date, e.time, e.dateConfirmed ? "yes" : "no", e.venue, e.address, e.town, e.state, e.zip, e.host, e.orgId || "", e.price, e.ticketUrl, e.featured ? "yes" : "no"].map(csvCell).join(","))).join("\n");
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", "attachment; filename=kyoona-events.csv");
     res.send(csv);
