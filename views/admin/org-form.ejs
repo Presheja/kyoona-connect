@@ -26,8 +26,9 @@
     <section class="adm-card fsec">
       <h2>Location &amp; contact</h2>
       <div class="row2">
-        <label class="fld"><span>Town</span><input name="town" value="<%= org.town %>" placeholder="Waltham"></label>
-        <label class="fld"><span>Area</span><select name="city"><option value="boston">Greater Boston</option></select></label>
+        <label class="fld"><span>City / town</span><input name="town" value="<%= org.town %>" placeholder="Waltham"></label>
+        <label class="fld"><span>State</span><input name="state" value="<%= org.state %>" list="state-list" placeholder="MA" maxlength="40"><small>Two-letter code works best, e.g. MA, TX, MD.</small></label>
+        <%- include('../partials/states-datalist') %>
       </div>
       <label class="fld"><span>Address</span><input name="address" value="<%= org.address %>" placeholder="133 School St, Waltham, MA 02451"><small>Used for the "Open in Maps" button.</small></label>
       <div class="row2">

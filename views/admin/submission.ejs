@@ -26,7 +26,7 @@
           <dt>Type</dt><dd><%= d.category %></dd>
           <dt>Description</dt><dd class="pre"><%= d.description %></dd>
           <dt>Meets / opens</dt><dd><%= d.meets || '—' %></dd>
-          <dt>Town</dt><dd><%= d.town %></dd>
+          <dt>Location</dt><dd><%= [d.town, d.state].filter(Boolean).join(", ") %></dd>
           <dt>Address</dt><dd><%= d.address || '—' %></dd>
           <dt>Phone</dt><dd><%= d.phone || '—' %></dd>
           <dt>Website</dt><dd><% if (d.website) { %><a class="link" href="<%= d.website %>" target="_blank" rel="noopener"><%= d.website %></a><% } else { %>—<% } %></dd>

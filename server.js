@@ -80,7 +80,7 @@ app.get("/", wrap(async (req, res) => {
   const up = await content.upcoming();
   const next = up.find(e => e.featured) || up[0] || null;
   const past = (await content.events()).filter(e => e.past).slice(0, 1);
-  res.render("home", { next, upcoming: up.slice(0, 6), past, boston: await content.city("boston") });
+  res.render("home", { next, upcoming: up.slice(0, 6), past, dir: await content.directory() });
 }));
 
 app.get("/events", wrap(async (req, res) => {
@@ -102,14 +102,13 @@ app.get("/events/:slug", wrap(async (req, res, next) => {
   });
 }));
 
-app.get("/boston", (req, res) => res.redirect(301, "/cities/boston"));
-app.get("/cities/:slug", wrap(async (req, res, next) => {
-  const city = await content.city(req.params.slug);
-  if (!city) return next();
+// Find your people: one directory, open to any location
+app.get(["/boston", "/cities/:slug"], (req, res) => res.redirect(301, "/find-your-people"));
+app.get("/find-your-people", wrap(async (req, res) => {
+  const dir = await content.directory();
   res.render("city", {
-    city,
-    events: (await content.upcoming()).filter(e => e.city === req.params.slug),
-    meta: { title: `Ugandans in ${city.name} — Kyoona Connect`, description: `Ugandan associations, churches, food and events in ${city.name}.`, image: "/media/og-image.jpg" }
+    dir,
+    meta: { title: "Find your people — Kyoona Connect", description: "Ugandan associations, churches, food and community groups, starting in Greater Boston.", image: "/media/og-image.jpg" }
   });
 }));
 

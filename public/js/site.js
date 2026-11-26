@@ -51,12 +51,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const search = document.querySelector("[data-org-search]");
     const pills = document.querySelector("[data-org-pills]");
     const empty = document.querySelector("[data-org-empty]");
+    const stateSel = document.querySelector("[data-org-state]");
     let cat = "all";
     const apply = () => {
       const q = (search.value || "").trim().toLowerCase();
+      const st = stateSel ? stateSel.value : "all";
       let shown = 0;
       grid.querySelectorAll(".org-card").forEach(c => {
-        const ok = (cat === "all" || c.dataset.cat === cat) && (!q || c.dataset.text.includes(q));
+        const ok = (cat === "all" || c.dataset.cat === cat) && (st === "all" || c.dataset.state === st) && (!q || c.dataset.text.includes(q));
         c.hidden = !ok; if (ok) shown++;
       });
       empty.hidden = shown > 0;
@@ -64,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const pick = key => { cat = key; pills.querySelectorAll(".org-pill").forEach(b => b.classList.toggle("is-on", b.dataset.cat === key)); apply(); };
     pills.addEventListener("click", e => { const b = e.target.closest(".org-pill"); if (b) pick(b.dataset.cat); });
     search.addEventListener("input", apply);
+    if (stateSel) stateSel.addEventListener("change", apply);
     const h = location.hash.slice(1);
     if (pills.querySelector(`[data-cat="${h}"]`)) pick(h);
 

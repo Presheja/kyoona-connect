@@ -104,23 +104,23 @@
   </section>
 
   <!-- FIND YOUR PEOPLE -->
-  <% if (boston) { %>
+  <% if (dir && dir.listings.length) { %>
   <section class="section people">
     <div class="shell people-grid">
-      <div class="people-photo" style="background-image:url('<%= boston.image %>')">
+      <div class="people-photo" style="background-image:url('/media/picnic.jpg')">
         <span class="sticker">Little Kampala<br>is real.</span>
       </div>
       <div class="people-copy">
         <p class="eyebrow">Find your people</p>
         <h2 class="section-title">JUST MOVED?<br><span class="accent-coral">WE GOT YOU.</span></h2>
-        <p class="lede">Associations, churches, Luganda services, luwombo, rolex and the people who make it all happen, around Waltham and Greater Boston.</p>
+        <p class="lede">Associations, churches, Luganda services, luwombo, rolex and the people who make it all happen. Starting in Greater Boston, with the organizations that connect Ugandans across North America.</p>
         <div class="cat-row">
-          <% const counts = {}; boston.listings.forEach(l => counts[l.category] = (counts[l.category]||0)+1); %>
-          <a class="cat-tile c-community" href="/cities/boston#community"><strong><%= counts.community || 0 %></strong>Associations</a>
-          <a class="cat-tile c-faith" href="/cities/boston#faith"><strong><%= counts.faith || 0 %></strong>Churches</a>
-          <a class="cat-tile c-food" href="/cities/boston#food"><strong><%= counts.food || 0 %></strong>Places to eat</a>
+          <% const counts = {}; dir.listings.forEach(l => counts[l.category] = (counts[l.category]||0)+1); %>
+          <a class="cat-tile c-community" href="/find-your-people#community"><strong><%= counts.community || 0 %></strong>Associations</a>
+          <a class="cat-tile c-faith" href="/find-your-people#faith"><strong><%= counts.faith || 0 %></strong>Churches</a>
+          <a class="cat-tile c-food" href="/find-your-people#food"><strong><%= counts.food || 0 %></strong>Places to eat</a>
         </div>
-        <a class="btn btn-ink" href="/cities/boston">Explore Greater Boston <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
+        <a class="btn btn-ink" href="/find-your-people">Find your people <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
       </div>
     </div>
   </section>

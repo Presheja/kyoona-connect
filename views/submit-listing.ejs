@@ -4,7 +4,7 @@
   <div class="fp-intro">
     <p class="eyebrow">Find your people</p>
     <h1 class="display-title">ADD A <span class="accent-coral">LISTING.</span></h1>
-    <p class="lede">Associations, churches, fellowships, restaurants, Ugandan businesses, and groups that welcome newcomers. Listing is free, always.</p>
+    <p class="lede">Associations, churches, fellowships, restaurants, Ugandan businesses, and groups that welcome newcomers, wherever they are based. Listing is free, always.</p>
     <a class="fp-switch" href="/submit/update">
       <%- icon('edit', 18) %>
       <span><b>Already listed?</b>Update your address, photos, service times or anything else.</span>
@@ -20,9 +20,11 @@
     <label class="field"><span>Describe it for someone who just moved here *</span><textarea name="description" rows="4" required placeholder="Who it's for, what happens there, what to expect the first time."><%= f.description || '' %></textarea></label>
     <label class="field"><span>When do you meet or open?</span><input name="meets" value="<%= f.meets || '' %>" placeholder="Sundays 11am, Luganda service"></label>
     <div class="field-row">
-      <label class="field"><span>Town *</span><input name="town" value="<%= f.town || '' %>" required placeholder="Waltham"></label>
-      <label class="field"><span>Address</span><input name="address" value="<%= f.address || '' %>" placeholder="Street, town, ZIP"></label>
+      <label class="field"><span>City / town *</span><input name="town" value="<%= f.town || '' %>" required placeholder="Waltham"></label>
+      <label class="field"><span>State *</span><input name="state" value="<%= f.state || '' %>" required list="state-list" placeholder="MA" maxlength="40"></label>
     </div>
+    <%- include('partials/states-datalist') %>
+    <label class="field"><span>Street address</span><input name="address" value="<%= f.address || '' %>" placeholder="Street and ZIP"></label>
     <div class="field-row">
       <label class="field"><span>Phone</span><input name="phone" value="<%= f.phone || '' %>"></label>
       <label class="field"><span>Website or Facebook page</span><input name="website" value="<%= f.website || '' %>" placeholder="https://"></label>

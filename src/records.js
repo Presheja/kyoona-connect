@@ -97,7 +97,7 @@ async function seed() {
       if (!f.endsWith(".json")) continue;
       const city = JSON.parse(fs.readFileSync(path.join(cdir, f), "utf8"));
       let i = 0;
-      for (const l of city.listings || []) await put("org", slugify(l.name), { status: "published", city: city.slug, order: i++, ...l });
+      for (const l of city.listings || []) await put("org", slugify(l.name), { status: "published", state: city.state || "MA", order: i++, ...l });
     }
   }
 }

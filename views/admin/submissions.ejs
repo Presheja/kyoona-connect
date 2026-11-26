@@ -18,7 +18,7 @@
       <span class="sub-main">
         <span class="sub-type t-<%= x.type %>"><%= TYPE_LABEL[x.type] %></span>
         <strong><%= x.type === 'update' ? d.orgName : (d.title || d.name) %></strong>
-        <small><%= x.type === 'event' ? (d.date + (d.venue ? ' · ' + d.venue : '')) : x.type === 'update' ? 'Change requested' + (d.closed ? ' · says it has closed' : '') : (d.town + ' · ' + (d.description || '').slice(0, 80)) %></small>
+        <small><%= x.type === 'event' ? (d.date + (d.venue ? ' · ' + d.venue : '')) : x.type === 'update' ? 'Change requested' + (d.closed ? ' · says it has closed' : '') : ([d.town, d.state].filter(Boolean).join(', ') + ' · ' + (d.description || '').slice(0, 80)) %></small>
       </span>
       <span class="sub-from"><b><%= x.submitter.name %></b><small><%= x.submitter.email %></small></span>
       <span class="sub-when"><span class="pill st-<%= x.status === 'new' ? 'pending' : x.status === 'approved' ? 'published' : 'cancelled' %>"><%= x.status %></span><small><%= x.at.slice(0,10) %></small></span>

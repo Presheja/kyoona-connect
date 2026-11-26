@@ -128,7 +128,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       if (await records.get("event", id)) id += "-" + crypto.randomBytes(2).toString("hex");
       await records.put("event", id, {
         slug: id, title: d.title, subtitle: "", kicker: "", category: d.category || "nightlife", status: "draft", featured: false,
-        date: d.date, time: d.time, dateConfirmed: true, city: "boston", venue: d.venue, address: d.address,
+        date: d.date, time: d.time, dateConfirmed: true, town: d.town || "", state: d.state || "", venue: d.venue, address: d.address,
         host: d.host || d.name, contactEmail: d.email, contactPhone: d.phone, price: d.price || "See details", ticketUrl: d.ticketUrl,
         art: "purple", image: d.image || "", description: d.description, fromSubmission: s.id
       });
@@ -140,11 +140,11 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       let id = records.slugify(d.name);
       if (await records.get("org", id)) id += "-" + crypto.randomBytes(2).toString("hex");
       await records.put("org", id, {
-        name: d.name, category: d.category, city: "boston", town: d.town, address: d.address, phone: d.phone, website: d.website,
+        name: d.name, category: d.category, town: d.town, state: d.state || "", address: d.address, phone: d.phone, website: d.website,
         description: d.description, meets: d.meets, images: d.images || [], photosRepresentative: false, verified: true, status: "published", order: 999, fromSubmission: s.id
       });
       await records.put("submission", s.id, { ...s, status: "approved", result: `/admin/organizations/${id}/edit`, decidedAt: new Date().toISOString() });
-      if (notify) await tell(s, "You're listed on Kyoona Connect", `${d.name} is now on Find your people. Newcomers can find you there.`, `${SITE}/cities/boston`, "See your listing");
+      if (notify) await tell(s, "You're listed on Kyoona Connect", `${d.name} is now on Find your people. Newcomers can find you there.`, `${SITE}/find-your-people`, "See your listing");
       return go(res, `/admin/organizations/${id}/edit`, `${d.name} is now listed.`);
     }
     if (s.type === "update") {
@@ -156,7 +156,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       if (d.closed) next.status = "hidden";
       await records.put("org", o.id, next);
       await records.put("submission", s.id, { ...s, status: "approved", result: `/admin/organizations/${o.id}/edit`, decidedAt: new Date().toISOString() });
-      if (notify) await tell(s, "Your listing is updated", `the changes to ${o.name} are now live on Kyoona Connect.`, `${SITE}/cities/boston`, "See the listing");
+      if (notify) await tell(s, "Your listing is updated", `the changes to ${o.name} are now live on Kyoona Connect.`, `${SITE}/find-your-people`, "See the listing");
       return go(res, `/admin/organizations/${o.id}/edit`, `Changes applied to ${o.name}.`);
     }
     res.redirect("/admin/submissions");
@@ -186,12 +186,12 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     if (q) list = list.filter(e => (e.title + " " + e.venue + " " + e.host).toLowerCase().includes(q));
     page(res, "events", "events", { list, f, q: req.query.q || "", counts, interests: INTERESTS });
   }));
-  const blankEvent = { title: "", subtitle: "", kicker: "", category: "nightlife", status: "draft", featured: false, date: "", time: "", dateConfirmed: true, city: "boston", venue: "", address: "", host: "", contactEmail: "", contactPhone: "", price: "", ticketUrl: "", art: "purple", image: "", description: "" };
+  const blankEvent = { title: "", subtitle: "", kicker: "", category: "nightlife", status: "draft", featured: false, date: "", time: "", dateConfirmed: true, town: "", state: "MA", venue: "", address: "", host: "", contactEmail: "", contactPhone: "", price: "", ticketUrl: "", art: "purple", image: "", description: "" };
   r.get("/events/new", (req, res) => page(res, "event-form", "events", { ev: blankEvent, isNew: true, interests: INTERESTS }));
   r.get("/events/:id/edit", wrap(async (req, res, next) => {
     const ev = await records.get("event", req.params.id);
     if (!ev) return next();
-    page(res, "event-form", "events", { ev: { ...blankEvent, ...ev }, isNew: false, interests: INTERESTS });
+    page(res, "event-form", "events", { ev: { ...blankEvent, ...ev, state: ev.state || (ev.city === "boston" ? "MA" : "") }, isNew: false, interests: INTERESTS });
   }));
   r.post("/events/save", wrap(async (req, res) => {
     const b = req.body;
@@ -210,12 +210,13 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       category: INTERESTS.some(i => i.key === b.category) ? b.category : "nightlife",
       status: ["draft", "published", "cancelled"].includes(b.status) ? b.status : "draft",
       featured: b.featured === "on", date: b.date, time: (b.time || "").trim(), dateConfirmed: b.dateConfirmed === "on",
-      city: b.city || "boston", venue: (b.venue || "").trim(), address: (b.address || "").trim(),
+      town: (b.town || "").trim(), state: (b.state || "").trim().slice(0, 40), venue: (b.venue || "").trim(), address: (b.address || "").trim(),
       host: (b.host || "").trim(), contactEmail: (b.contactEmail || "").trim(), contactPhone: (b.contactPhone || "").trim(),
       price: (b.price || "").trim() || "See details", ticketUrl: /^https?:\/\//.test(b.ticketUrl || "") ? b.ticketUrl.trim() : "",
       art: ["purple", "gold", "magenta", "teal"].includes(b.art) ? b.art : "purple",
       image: cover[0] || "", description: (b.description || "").trim()
     };
+    delete ev.city;
     if (ev.featured) for (const other of await records.list("event")) if (other.id !== id && other.featured) await records.put("event", other.id, { ...other, featured: false });
     await records.put("event", id, ev);
     go(res, "/admin/events" + (ev.status === "draft" ? "?f=draft" : ""), `Saved "${title}".`);
@@ -250,12 +251,12 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     if (q) list = list.filter(o => (o.name + " " + o.town + " " + o.description).toLowerCase().includes(q));
     page(res, "organizations", "organizations", { list, f, q: req.query.q || "", counts, cats: ORG_CATS });
   }));
-  const blankOrg = { name: "", category: "community", city: "boston", meets: "", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" };
+  const blankOrg = { name: "", category: "community", state: "MA", meets: "", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" };
   r.get("/organizations/new", (req, res) => page(res, "org-form", "organizations", { org: blankOrg, isNew: true, cats: ORG_CATS }));
   r.get("/organizations/:id/edit", wrap(async (req, res, next) => {
     const org = await records.get("org", req.params.id);
     if (!org) return next();
-    page(res, "org-form", "organizations", { org: { ...blankOrg, ...org }, isNew: false, cats: ORG_CATS });
+    page(res, "org-form", "organizations", { org: { ...blankOrg, ...org, state: org.state || (org.city === "boston" ? "MA" : "") }, isNew: false, cats: ORG_CATS });
   }));
   r.post("/organizations/save", wrap(async (req, res) => {
     const b = req.body;
@@ -268,12 +269,13 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     const org = {
       ...old, name,
       category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community",
-      city: b.city || "boston", town: (b.town || "").trim(), address: (b.address || "").trim(),
+      town: (b.town || "").trim(), state: (b.state || "").trim().slice(0, 40), address: (b.address || "").trim(),
       phone: (b.phone || "").trim(), website: /^https?:\/\//.test(b.website || "") ? b.website.trim() : (b.website ? "https://" + b.website.trim() : ""),
       description: (b.description || "").trim(), meets: (b.meets || "").trim(), images,
       photosRepresentative: b.photosRepresentative === "on", verified: b.verified === "on",
       status: b.status === "hidden" ? "hidden" : "published", order: old.order ?? 999
     };
+    delete org.city;
     await records.put("org", id, org);
     go(res, "/admin/organizations", `Saved ${name}.`);
   }));

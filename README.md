@@ -10,7 +10,7 @@ No PHP. No Replit bill. Runs as a Node.js app on Hostinger.
 |---|---|---|
 | NEW | `server.js` | The app: pages, sign-up, confirm/unsubscribe, admin |
 | NEW | `content/events.json` | Starter events, imported on first run. After that, use /admin |
-| NEW | `content/cities/boston.json` | Greater Boston page text plus starter listings, imported on first run |
+| NEW | `content/cities/boston.json` | Starter listings, imported on first run |
 | NEW | `src/admin/` | The admin portal: `pages.js` (sidebar) and `routes.js` (pages) |
 | NEW | `src/records.js` | Stores events, organizations, photos, announcements and settings |
 | NEW | `src/store.js` | Saves community members (MySQL on Hostinger, a local file on your laptop) |

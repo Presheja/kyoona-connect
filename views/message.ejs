@@ -31,7 +31,7 @@
     <p class="eyebrow">Got it</p>
     <h1 class="display-title">THANK <span class="accent-coral">YOU.</span></h1>
     <p class="lede"><%= subtype === 'event' ? "We'll review your event and let you know when it's live. Usually within a day or two." : subtype === 'update' ? "We'll check the changes and update the listing. We may email you to confirm." : "We'll review the listing and let you know when it's live." %></p>
-    <a class="btn btn-primary" href="<%= subtype === 'event' ? '/events' : '/cities/boston' %>"><%= subtype === 'event' ? 'See what else is on' : 'Find your people' %> <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
+    <a class="btn btn-primary" href="<%= subtype === 'event' ? '/events' : '/find-your-people' %>"><%= subtype === 'event' ? 'See what else is on' : 'Find your people' %> <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
   <% } else if (kind === '404') { %>
     <p class="eyebrow">404</p><h1 class="display-title">THIS PAGE <span class="accent-coral">LEFT EARLY.</span></h1>
     <p class="lede">Like that one uncle at every party. Let's get you back.</p>

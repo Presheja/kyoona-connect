@@ -1,12 +1,12 @@
 // Public-facing content, read from the records the admin portal manages.
-const fs = require("fs");
-const path = require("path");
 const records = require("./records");
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function decorate(ev) {
+  ev = { ...ev, state: ev.state || (ev.city === "boston" ? "MA" : "") };
+  ev.location = [ev.town, ev.state].filter(Boolean).join(", ");
   const d = new Date((ev.date || "2099-01-01") + "T12:00:00");
   const today = new Date(); today.setHours(0, 0, 0, 0);
   return {
@@ -31,14 +31,22 @@ async function events() { return (await allEvents()).filter(e => e.status === "p
 async function upcoming() { return (await events()).filter(e => !e.past); }
 async function event(slug) { const e = await records.get("event", slug); return e && e.status === "published" ? decorate(e) : null; }
 
-async function allOrgs() { return (await records.list("org")).sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || a.name.localeCompare(b.name)); }
-async function city(slug) {
-  if (!/^[a-z-]+$/.test(slug)) return null;
-  const p = path.join(__dirname, "..", "content", "cities", slug + ".json");
-  if (!fs.existsSync(p)) return null;
-  const meta = JSON.parse(fs.readFileSync(p, "utf8"));
-  const listings = (await allOrgs()).filter(o => o.city === slug && o.status !== "hidden");
-  return { ...meta, listings };
+// Location is open: any town and state. Older records that only had the Boston area get "MA".
+const HOME_STATE = "MA";
+function withLocation(o) {
+  const state = (o.state || (o.city === "boston" ? HOME_STATE : "")).trim();
+  const location = [o.town, state].filter(Boolean).join(", ");
+  return { ...o, state, location };
+}
+async function allOrgs() {
+  return (await records.list("org")).map(withLocation)
+    .sort((a, b) => (a.state === HOME_STATE ? 0 : 1) - (b.state === HOME_STATE ? 0 : 1) || (a.order ?? 999) - (b.order ?? 999) || a.name.localeCompare(b.name));
+}
+// Everything shown on Find your people, home state first.
+async function directory() {
+  const listings = (await allOrgs()).filter(o => o.status !== "hidden");
+  const states = [...new Set(listings.map(o => o.state).filter(Boolean))].sort((a, b) => (a === HOME_STATE ? -1 : b === HOME_STATE ? 1 : a.localeCompare(b)));
+  return { listings, states };
 }
 
-module.exports = { decorate, allEvents, events, upcoming, event, allOrgs, city };
+module.exports = { decorate, allEvents, events, upcoming, event, allOrgs, directory };

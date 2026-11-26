@@ -16,7 +16,7 @@
       <ul class="facts">
         <li><b>Date</b><span><%= ev.dateLabel %></span></li>
         <% if (ev.time) { %><li><b>Time</b><span><%= ev.time %></span></li><% } %>
-        <li><b>Where</b><span><%= ev.venue %><%= ev.address ? ', ' + ev.address : '' %></span></li>
+        <li><b>Where</b><span><%= [ev.venue, ev.address, ev.location].filter(Boolean).join(', ') %></span></li>
         <li><b>Host</b><span><%= ev.host %></span></li>
       </ul>
       <p class="lede"><%= ev.description %></p>

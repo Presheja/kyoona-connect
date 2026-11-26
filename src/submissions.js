@@ -33,7 +33,7 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
     mailer.sendAdminNotice && mailer.sendAdminNotice(CONTACT, `New ${label}: ${data.title || data.name || data.orgName}`, `${SITE}/admin/submissions/${id}`).catch(() => {});
     return id;
   }
-  async function orgOptions() { return (await content.allOrgs()).filter(o => o.status !== "hidden").map(o => ({ id: o.id, name: o.name, town: o.town })); }
+  async function orgOptions() { return (await content.allOrgs()).filter(o => o.status !== "hidden").map(o => ({ id: o.id, name: o.name, town: o.location })); }
 
   // ---------- List your event ----------
   r.get("/event", (req, res) => res.render("submit-event", { f: {}, errors: [], meta: meta("List your event") }));
@@ -63,14 +63,15 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
   r.post("/listing", wrap(async (req, res) => {
     const b = req.body;
     const f = {
-      name: clean(b.name), category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community", town: clean(b.town), address: clean(b.address, 200),
+      name: clean(b.name), category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community", town: clean(b.town), state: clean(b.state, 40), address: clean(b.address, 200),
       phone: clean(b.phone, 40), website: urlish(b.website), description: clean(b.description, LIMITS.long), meets: clean(b.meets, 300),
       contactName: clean(b.contactName), contactEmail: clean(b.contactEmail), role: clean(b.role), notes: clean(b.notes, 600)
     };
     const errors = [];
     if (b.website2) return res.redirect("/submit/thanks?t=listing");
     if (!f.name) errors.push("Add the name of the organization.");
-    if (!f.town) errors.push("Which town is it in?");
+    if (!f.town) errors.push("Which city or town is it in?");
+    if (!f.state) errors.push("Which state is it in?");
     if (!f.description) errors.push("Add a short description so newcomers know what it is.");
     if (!f.contactName) errors.push("Tell us your name.");
     if (!emailOk(f.contactEmail)) errors.push("Add an email we can reach you on.");

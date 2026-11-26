@@ -10,13 +10,13 @@
 </form>
 <section class="adm-card flush">
   <table class="tbl orgs">
-    <thead><tr><th>Organization</th><th>Type</th><th>Town</th><th>Photos</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Organization</th><th>Type</th><th>Location</th><th>Photos</th><th>Status</th><th></th></tr></thead>
     <tbody>
     <% list.forEach(o => { %>
       <tr>
         <td><a class="who" href="/admin/organizations/<%= o.id %>/edit"><span class="sq" <% if ((o.images||[])[0]) { %>style="background-image:url('<%= o.images[0] %>')"<% } %>></span><div><strong><%= o.name %></strong><small><%= o.address || o.town %></small></div></a></td>
         <td><%= (cats.find(c => c[0] === o.category) || [,''])[1] %></td>
-        <td><%= o.town %></td>
+        <td><%= o.location %></td>
         <td><%= (o.images || []).length %>/4<%= o.photosRepresentative ? ' · stock' : '' %></td>
         <td>
           <span class="pill <%= o.verified ? 'st-confirmed' : 'st-pending' %>"><%= o.verified ? 'Confirmed' : 'To confirm' %></span>
