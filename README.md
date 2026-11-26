@@ -44,6 +44,7 @@ Open http://localhost:3000. With no settings, members are saved to `data/members
 - **Tell the community:** `/admin` → pick the event → send to all members, only members interested in that event's category, or only Greater Boston members. "Send a test to me only" is ticked by default.
 - **Export members:** `/admin` → Download CSV.
 - **Add a listing:** edit `content/cities/boston.json`, and set `"verified": true` once you've confirmed it.
+- **Photos for a listing:** each listing has an `images` list (up to 4). Use a web link, or put a photo in `public/media/orgs/` and write `/media/orgs/your-photo.jpg`. When the photos are the organization's own, set `"photosRepresentative": false` so the "Representative photos" note disappears.
 
 ## How sign-up works
 

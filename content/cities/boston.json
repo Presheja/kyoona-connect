@@ -15,7 +15,14 @@
       "phone": "",
       "website": "",
       "source": "https://watchdoguganda.com/?p=159232",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=75&auto=format&fit=crop",
+        "/media/picnic.jpg",
+        "/media/hero.jpg"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "Ugandan North American Association (UNAA)",
@@ -26,7 +33,14 @@
       "phone": "",
       "website": "https://unaa.org",
       "source": "https://en.wikipedia.org/wiki/Ugandan_Americans",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&q=75&auto=format&fit=crop",
+        "/media/hero.jpg",
+        "/media/picnic.jpg"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "Africano Waltham (African Cultural Services, Inc.)",
@@ -37,7 +51,14 @@
       "phone": "",
       "website": "",
       "source": "https://gbfb.org/2021/09/07/food-for-little-kampala",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=75&auto=format&fit=crop",
+        "/media/picnic.jpg",
+        "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&q=75&auto=format&fit=crop"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "Ugandan Catholic Community in the Archdiocese of Boston (UCCB)",
@@ -48,7 +69,14 @@
       "phone": "",
       "website": "https://www.uccb.us",
       "source": "https://eadm.news/70-2024/369-glorious-countdown-to-the-feast-of-the-uganda-martyrs-in-boston-waxing-spiritual",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1745852738057-ccecd3baab33?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1759784227642-813fbfaf7f4d?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1593678820334-91d5f99be314?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1728939862879-a1f788974d2c?w=1200&q=75&auto=format&fit=crop"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "St. Peter’s Anglican Church",
@@ -59,7 +87,14 @@
       "phone": "",
       "website": "",
       "source": "https://eadm.news/39-carousel/big/368-finally-ugandan-founded-st-peter-s-anglican-church-finds-new-home-in-winchester-massachusetts",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1728939862879-a1f788974d2c?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1745852738057-ccecd3baab33?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1593678820334-91d5f99be314?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1759784227642-813fbfaf7f4d?w=1200&q=75&auto=format&fit=crop"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "St. Paul’s Anglican Church",
@@ -70,7 +105,14 @@
       "phone": "",
       "website": "",
       "source": "https://adne.org/news-from-the-diocese-1/stpeterssports-8ky89-6crp9-zpxrn",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1759784227642-813fbfaf7f4d?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1593678820334-91d5f99be314?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1745852738057-ccecd3baab33?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1728939862879-a1f788974d2c?w=1200&q=75&auto=format&fit=crop"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "St. Luke’s Anglican Church",
@@ -81,7 +123,14 @@
       "phone": "",
       "website": "",
       "source": "https://adne.org/news-from-the-diocese-1/ugandanarchbishop",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1593678820334-91d5f99be314?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1728939862879-a1f788974d2c?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1745852738057-ccecd3baab33?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1759784227642-813fbfaf7f4d?w=1200&q=75&auto=format&fit=crop"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "New England Luganda SDA Church",
@@ -92,7 +141,14 @@
       "phone": "",
       "website": "https://newenglandlugandama.adventistchurch.org",
       "source": "https://newenglandlugandama.adventistchurch.org",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1745852738057-ccecd3baab33?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1728939862879-a1f788974d2c?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1593678820334-91d5f99be314?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1759784227642-813fbfaf7f4d?w=1200&q=75&auto=format&fit=crop"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "Karibu Restaurant",
@@ -103,7 +159,14 @@
       "phone": "(781) 899-7444",
       "website": "",
       "source": "https://library.bu.edu/culturecuisinesubsahara/local",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&q=75&auto=format&fit=crop",
+        "/media/hero.jpg"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "Sentie’s Kitchen",
@@ -114,7 +177,14 @@
       "phone": "(508) 927-8011",
       "website": "",
       "source": "https://www.bostonglobe.com/2026/11/08/metro/food-love-massachusetts-immigrants/",
-      "verified": false
+      "verified": false,
+      "images": [
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&q=75&auto=format&fit=crop",
+        "/media/picnic.jpg"
+      ],
+      "photosRepresentative": true
     },
     {
       "name": "Rhino Lounge",
@@ -125,7 +195,14 @@
       "phone": "",
       "website": "",
       "source": "https://www.mapquest.com/us/massachusetts/rhino-lounge-375980976",
-      "verified": false
+      "verified": false,
+      "images": [
+        "/media/lounge.jpg",
+        "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&q=75&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=75&auto=format&fit=crop",
+        "/media/hero.jpg"
+      ],
+      "photosRepresentative": true
     }
   ],
   "image": "/media/picnic.jpg"

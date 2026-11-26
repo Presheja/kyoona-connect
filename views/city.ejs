@@ -1,51 +1,67 @@
 <%- include('partials/head') %>
-<%- include('partials/header', { headerDark: true }) %>
+<%- include('partials/header') %>
+<%
+  const CAT = { community: 'Association', faith: 'Church & fellowship', food: 'Food & business', groups: 'Group' };
+  const cats = [['community', 'Associations'], ['faith', 'Churches'], ['food', 'Food']].filter(([k]) => city.listings.some(l => l.category === k));
+  const mapUrl = l => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.address || (l.name + ', ' + l.town + ', MA'));
+%>
 <main>
-  <section class="city-hero" style="--img:url('<%= city.image %>')">
+  <section class="org-hero">
     <div class="shell">
       <p class="eyebrow">Find your people</p>
-      <h1 class="display-title light">UGANDANS IN<br><span class="accent-yellow"><%= city.name.toUpperCase() %>.</span></h1>
-      <p class="script-big light"><%= city.tagline %></p>
-      <p class="lede light"><%= city.intro %></p>
+      <h1 class="org-title">Ugandans in <span class="accent-coral"><%= city.name %>.</span></h1>
+      <p class="org-sub">Associations, churches, Ugandan food and the people behind them. Wherever you landed, somebody here was new once too.</p>
     </div>
   </section>
-  <div class="city-toolbar">
-    <div class="shell toolbar-inner">
-      <div class="filter-bar" data-dir-filter>
-        <button class="chip is-on" data-cat="all">Everything <i><%= city.listings.length %></i></button>
-        <% [['community','Associations'],['faith','Churches & fellowships'],['food','Food & businesses'],['groups','WhatsApp & Facebook groups']].forEach(([k,l]) => { %>
-          <button class="chip" data-cat="<%= k %>" id="<%= k %>"><%= l %> <i><%= city.listings.filter(x => x.category === k).length %></i></button>
-        <% }) %>
+
+  <section class="shell org-body">
+    <div class="org-toolbar">
+      <label class="org-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" placeholder="Search organizations..." data-org-search aria-label="Search organizations">
+      </label>
+      <div class="org-pills" data-org-pills>
+        <button class="org-pill is-on" data-cat="all">All</button>
+        <% cats.forEach(([k, label]) => { %><button class="org-pill" data-cat="<%= k %>" id="<%= k %>"><%= label %></button><% }) %>
       </div>
-      <label class="search"><input type="search" placeholder="Search: Waltham, Luganda, food…" data-dir-search aria-label="Search listings"></label>
     </div>
-  </div>
-  <section class="section tight">
-    <div class="shell">
-      <div class="dir-grid" data-dir-grid>
-        <% city.listings.forEach(l => { %>
-          <article class="dir-card c-<%= l.category %>" data-cat="<%= l.category %>" data-text="<%= (l.name + ' ' + l.town + ' ' + l.description).toLowerCase() %>">
-            <div class="dir-top"><span class="dir-cat"><%= { community: 'Association', faith: 'Church & fellowship', food: 'Food & business', groups: 'Group' }[l.category] %></span><span class="dir-town"><%= l.town %></span></div>
+
+    <p class="org-label">Organizations</p>
+    <div class="org-grid" data-org-grid>
+      <% city.listings.forEach((l, i) => { const img = (l.images || [])[0]; %>
+        <article class="org-card c-<%= l.category %>" data-cat="<%= l.category %>" data-text="<%= (l.name + ' ' + l.town + ' ' + l.description).toLowerCase() %>">
+          <button class="org-img" type="button" data-open="<%= i %>" aria-label="View <%= l.name %>">
+            <% if (img) { %><img src="<%= img %>" alt="" loading="lazy" onerror="this.remove()"><% } %>
+            <span class="org-town"><%= l.town %></span>
+            <% if ((l.images || []).length > 1) { %><span class="org-count"><%= l.images.length %> photos</span><% } %>
+          </button>
+          <div class="org-info">
+            <span class="org-cat"><%= CAT[l.category] %></span>
             <h3><%= l.name %></h3>
-            <p><%= l.description %></p>
-            <ul class="dir-facts">
-              <% if (l.address) { %><li>● <%= l.address %></li><% } %>
-              <% if (l.phone) { %><li>☎ <a href="tel:<%= l.phone.replace(/[^\d+]/g,'') %>"><%= l.phone %></a></li><% } %>
-              <% if (l.website) { %><li>↗ <a href="<%= l.website %>" target="_blank" rel="noopener"><%= l.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') %></a></li><% } %>
-            </ul>
-            <div class="dir-foot">
-              <span class="badge <%= l.verified ? 'ok' : 'check' %>"><%= l.verified ? 'Confirmed' : 'Not yet confirmed' %></span>
-              <a href="mailto:<%= contact %>?subject=<%= encodeURIComponent('Update listing: ' + l.name) %>">Is this yours?</a>
+            <p class="org-where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><%= l.address || l.town %></p>
+            <p class="org-desc"><%= l.description %></p>
+            <div class="org-foot">
+              <span class="org-status <%= l.verified ? 'ok' : '' %>"><%= l.verified ? '✓ Confirmed' : 'Details being confirmed' %></span>
+              <button class="org-view" type="button" data-open="<%= i %>">View</button>
             </div>
-          </article>
-        <% }) %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+    <div class="org-empty" data-org-empty hidden>
+      <h3>No match yet.</h3>
+      <p>Know a group, church or Ugandan business that should be here? <a class="text-link" href="mailto:<%= contact %>?subject=Add%20a%20listing">Tell us</a> and we'll add it.</p>
+    </div>
+
+    <div class="org-add">
+      <div>
+        <h2>Run an association, church or Ugandan business?</h2>
+        <p>Get listed for free, or send us better photos and details for your page.</p>
       </div>
-      <div class="empty-note" data-dir-empty hidden>
-        <strong>Know one we're missing?</strong> WhatsApp and Facebook groups live in people's phones, not on Google. If you run one that welcomes newcomers, <a class="text-link" href="mailto:<%= contact %>?subject=Add%20a%20listing">tell us</a>.
-      </div>
-      <p class="fine">"Not yet confirmed" listings come from public sources, last checked <%= city.lastChecked %>. Spot something wrong? Tap "Is this yours?" and we'll fix it.</p>
+      <a class="btn btn-primary" href="mailto:<%= contact %>?subject=Add%20a%20listing">Get listed <span class="arrow-circle">↗</span></a>
     </div>
   </section>
+
   <section class="join-strip-wrap">
     <div class="shell join-strip">
       <div><h2>NEW HERE? DON'T BE A STRANGER.</h2><p>Join the community and we'll let you know when the next gathering is on.</p></div>
@@ -53,4 +69,32 @@
     </div>
   </section>
 </main>
+
+<!-- Organization profile popup -->
+<dialog class="org-modal" data-org-modal aria-labelledby="om-title">
+  <button class="om-close" type="button" data-close aria-label="Close">×</button>
+  <div class="om-gallery">
+    <div class="om-main"><img data-om-main alt=""></div>
+    <div class="om-thumbs" data-om-thumbs></div>
+    <p class="om-photo-note" data-om-note hidden>Representative photos. Send us real ones and we'll swap them in.</p>
+  </div>
+  <div class="om-body">
+    <span class="org-cat" data-om-cat></span>
+    <h2 id="om-title" data-om-name></h2>
+    <p class="om-desc" data-om-desc></p>
+    <ul class="om-rows">
+      <li data-om-addr-row><span class="om-ico">📍</span><div><strong data-om-addr></strong><a data-om-map target="_blank" rel="noopener">Open in Maps ↗</a></div></li>
+      <li data-om-phone-row><span class="om-ico">📞</span><div><a data-om-phone></a></div></li>
+      <li data-om-web-row><span class="om-ico">🌐</span><div><a data-om-web target="_blank" rel="noopener"></a></div></li>
+    </ul>
+    <a class="om-update" data-om-update>Is this yours? Update the details</a>
+  </div>
+</dialog>
+
+<script type="application/json" id="org-data"><%- JSON.stringify(city.listings.map(l => ({
+  name: l.name, cat: CAT[l.category], town: l.town, description: l.description,
+  address: l.address, phone: l.phone, website: l.website, images: (l.images || []).slice(0, 4),
+  representative: !!l.photosRepresentative, map: mapUrl(l),
+  update: 'mailto:' + contact + '?subject=' + encodeURIComponent('Update listing: ' + l.name)
+}))).replace(/</g, '\\u003c') %></script>
 <%- include('partials/footer') %>
