@@ -226,7 +226,7 @@ main{overflow-x:clip}
 .cat-tile{border-radius:20px;padding:1.1rem 1.2rem;font-weight:700;font-size:.92rem;color:#fff;transition:transform .2s}
 .cat-tile:hover{transform:translateY(-4px) rotate(-1deg)}
 .cat-tile strong{display:block;font-family:var(--display);font-weight:400;font-size:2.6rem;line-height:1}
-.c-community.cat-tile{background:var(--teal)}.c-faith.cat-tile{background:var(--purple)}.c-food.cat-tile{background:var(--coral)}
+.cat-tile{background:var(--cat,var(--purple))}
 
 /* ---------- MANIFESTO ---------- */
 .manifesto{background:var(--coral);color:#fff;padding:7rem 0;text-align:center;position:relative;overflow:hidden}
@@ -415,14 +415,14 @@ th{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--so
 .org-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 2px 14px rgba(37,16,90,.08);display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s}
 .org-card:hover{transform:translateY(-5px);box-shadow:0 14px 36px rgba(37,16,90,.15)}
 .org-img{position:relative;display:block;width:100%;aspect-ratio:16/10;border:0;padding:0;cursor:pointer;overflow:hidden;background:linear-gradient(145deg,var(--ink),var(--purple))}
-.c-faith .org-img{background:linear-gradient(145deg,#3b1d7a,var(--purple))}.c-food .org-img{background:linear-gradient(145deg,#ff7d45,var(--coral))}.c-community .org-img{background:linear-gradient(145deg,#1f5e5e,var(--teal))}
+.org-card[style] .org-img{background:linear-gradient(145deg,rgba(0,0,0,.35),rgba(0,0,0,0) 70%),var(--cat)}
 .org-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .org-card:hover .org-img img{transform:scale(1.05)}
 .org-town{position:absolute;top:.7rem;left:.7rem;background:var(--ink);color:#fff;font-size:.72rem;font-weight:700;padding:.32rem .65rem;border-radius:8px}
 .org-count{position:absolute;bottom:.7rem;right:.7rem;background:rgba(0,0,0,.55);color:#fff;font-size:.72rem;font-weight:600;padding:.3rem .6rem;border-radius:999px;backdrop-filter:blur(4px)}
 .org-info{padding:1.1rem 1.25rem 1.2rem;display:flex;flex-direction:column;gap:.4rem;flex:1}
 .org-cat{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--coral)}
-.c-faith .org-cat{color:var(--purple)}.c-community .org-cat{color:var(--teal)}
+.org-card .org-cat{color:var(--cat-text,var(--coral))}
 .org-info h3{margin:0;font-size:1.08rem;line-height:1.3;color:var(--ink)}
 .org-where{margin:0;display:flex;gap:.4rem;align-items:center;font-size:.83rem;color:var(--soft)}
 .org-where svg{flex:none}

@@ -20,6 +20,7 @@ const mailer = require("./src/mailer");
 const icon = require("./src/icons");
 const L = require("./src/location");
 const records = require("./src/records");
+const cats = require("./src/categories");
 const adminRouter = require("./src/admin/routes");
 const submissionsRouter = require("./src/submissions");
 
@@ -30,14 +31,6 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex");
 const CONTACT = process.env.CONTACT_EMAIL || "hello@kyoonaconnect.com";
 
-const INTERESTS = [
-  { key: "nightlife", label: "Nights out" },
-  { key: "faith", label: "Church & faith" },
-  { key: "family", label: "Family & kids" },
-  { key: "food", label: "Food & culture" },
-  { key: "convention", label: "Conventions & travel" },
-  { key: "business", label: "Business & networking" }
-];
 const CITIES = ["Greater Boston", "Elsewhere in New England", "DC & Maryland", "Dallas–Fort Worth", "Los Angeles", "Somewhere else"];
 
 app.set("view engine", "ejs");
@@ -59,7 +52,11 @@ app.use((req, res, next) => {
   const st = req.app.locals.settings || {};
   res.locals.settings = st;
   res.locals.contact = st.supportEmail || CONTACT;
-  res.locals.interests = INTERESTS;
+  res.locals.interests = cats.list("event");
+  res.locals.joinInterests = cats.list("event").filter(c => c.join);
+  res.locals.orgCats = cats.list("org");
+  res.locals.catStyle = cats.style;
+  res.locals.catLabel = cats.label;
   res.locals.icon = icon;
   res.locals.STATES = L.STATES; res.locals.CANADA = L.CANADA; res.locals.mapUrl = L.mapUrl; res.locals.stateName = L.stateName;
   res.locals.cities = CITIES;
@@ -134,7 +131,7 @@ app.post("/join", async (req, res) => {
     firstName: String(b.firstName || "").trim().slice(0, 80),
     email: String(b.email || "").trim().slice(0, 190),
     city: CITIES.includes(b.city) ? b.city : "",
-    interests: [].concat(b.interests || []).filter(k => INTERESTS.some(i => i.key === k)),
+    interests: [].concat(b.interests || []).filter(k => cats.list("event").some(i => i.key === k && i.join)),
     consent: b.consent === "yes" || b.consent === true || b.consent === "on"
   };
   const errors = [];
@@ -176,10 +173,10 @@ app.post("/unsubscribe/:token", async (req, res) => {
 });
 
 // ---------- public forms ----------
-app.use("/submit", submissionsRouter({ records, content, mailer, INTERESTS, CONTACT, SITE }));
+app.use("/submit", submissionsRouter({ records, content, mailer, cats, CONTACT, SITE }));
 
 // ---------- admin portal (see src/admin) ----------
-app.use("/admin", adminRouter({ store, records, content, mailer, INTERESTS, CITIES, SITE, CONTACT, SECRET, ADMIN_PASSWORD }));
+app.use("/admin", adminRouter({ store, records, content, mailer, cats, CITIES, SITE, CONTACT, SECRET, ADMIN_PASSWORD }));
 
 // ---------- 404 & errors ----------
 app.use((req, res) => res.status(404).render("message", { kind: "404", meta: { ...res.locals.meta, title: "Not found — Kyoona Connect" } }));
@@ -187,6 +184,7 @@ app.use((err, req, res, next) => { console.error(err); res.status(500).render("m
 
 store.init()
   .then(() => records.init(store.getPool))
+  .then(() => cats.load())
   .then(async () => { app.locals.settings = (await records.get("setting", "site")) || {}; })
   .then(() => app.listen(PORT, () => console.log(`Kyoona Connect running on ${SITE} (storage: ${store.useMysql ? "MySQL" : "local file"}, email: ${mailer.configured ? "SMTP" : "console"})`)))
   .catch(e => { console.error("Could not start:", e); process.exit(1); });

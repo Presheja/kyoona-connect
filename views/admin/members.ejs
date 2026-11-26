@@ -15,7 +15,7 @@
       <tr>
         <td><div class="who"><span class="av"><%= (m.first_name || m.email)[0].toUpperCase() %></span><div><strong><%= m.first_name || '—' %></strong><small><%= m.email %></small></div></div></td>
         <td><%= m.city || '—' %></td>
-        <td><div class="tags"><% (m.interests || '').split(',').filter(Boolean).forEach(k => { const it = interests.find(i => i.key === k); %><span class="tag"><%- icon(k, 12) %><%= it ? it.label : k %></span><% }) %></div></td>
+        <td><div class="tags"><% (m.interests || '').split(',').filter(Boolean).map(k => interests.find(i => i.key === k)).filter(Boolean).forEach(it => { %><span class="tag"><%- icon(it.icon, 12) %><%= it.label %></span><% }) %></div></td>
         <td><span class="pill st-<%= m.status %>"><%= m.status === 'pending' ? 'waiting' : m.status %></span></td>
         <td><%= String(m.created_at).slice(0,10) %></td>
         <td class="row-actions">

@@ -1,0 +1,78 @@
+<%- include('partials/top', { title: 'Categories', subtitle: 'The event categories and organization types used across the site' }) %>
+
+<section class="adm-card cat-card">
+  <div class="card-head"><h2>Event categories</h2></div>
+  <p class="muted">Used on event cards, the Events page filters and the List your event form. Ticking <strong>Join form</strong> also offers it as an interest when people join, so you can email them about events in that category.</p>
+  <div class="cat-list">
+    <div class="cat-row cat-ev cat-headrow"><span></span><span>Name</span><span>Icon</span><span>Join form</span><span>In use</span><span></span></div>
+    <% evCats.forEach((c, i) => { const n = used.event[c.key] || 0, m = used.members[c.key] || 0; %>
+    <form class="cat-row cat-ev" method="post" action="/admin/categories/event/<%= c.key %>">
+      <label class="fld"><span class="sr">Name</span><input name="label" value="<%= c.label %>" maxlength="40" required></label>
+      <label class="fld cat-icon"><span class="sr">Icon</span><span class="ic-prev"><%- icon(c.icon, 18) %></span><select name="icon"><% ICONS.forEach(k => { %><option value="<%= k %>" <%= c.icon === k ? 'selected' : '' %>><%= k %></option><% }) %></select></label>
+      <label class="chk"><input type="checkbox" name="join" value="yes" <%= c.join ? 'checked' : '' %>><span class="sr">Show on join form</span></label>
+      <small class="cat-use"><%= n %> event<%= n === 1 ? '' : 's' %><br><%= m %> member<%= m === 1 ? '' : 's' %></small>
+      <span class="row-actions">
+        <button class="ab ab-indigo" name="action" value="save"><%- icon('check', 15) %>Save</button>
+        <button class="ab ab-danger" name="action" value="delete" aria-label="Delete" data-confirm-btn="Delete &quot;<%= c.label %>&quot;?<%= m ? ' ' + m + ' member' + (m === 1 ? '' : 's') + ' picked it as an interest; it will drop off their list.' : '' %>"><%- icon('trash', 15) %></button>
+      </span>
+      <span class="cat-move">
+        <button class="mv" name="action" value="up" <%= i === 0 ? 'disabled' : '' %> aria-label="Move up">&#9650;</button>
+        <button class="mv" name="action" value="down" <%= i === evCats.length - 1 ? 'disabled' : '' %> aria-label="Move down">&#9660;</button>
+      </span>
+    </form>
+    <% }) %>
+    <form class="cat-row cat-ev cat-new" method="post" action="/admin/categories/event/add">
+      <span></span>
+      <label class="fld"><span class="sr">New category name</span><input name="label" maxlength="40" placeholder="New category, e.g. Graduations" required></label>
+      <label class="fld cat-icon"><span class="sr">Icon</span><span class="ic-prev"><%- icon('calendar', 18) %></span><select name="icon"><% ICONS.forEach(k => { %><option value="<%= k %>" <%= k === 'calendar' ? 'selected' : '' %>><%= k %></option><% }) %></select></label>
+      <label class="chk"><input type="checkbox" name="join" value="yes" checked><span class="sr">Show on join form</span></label>
+      <span></span>
+      <span class="row-actions"><button class="ab ab-coral"><%- icon('plus', 15) %>Add</button></span>
+    </form>
+  </div>
+</section>
+
+<section class="adm-card cat-card">
+  <div class="card-head"><h2>Organization types</h2></div>
+  <p class="muted"><strong>Name</strong> shows on each card and in the popup. <strong>Filter label</strong> is the button on Find your people (only shown when a listing uses it). <strong>Form wording</strong> is what people pick from on the Add a listing form.</p>
+  <div class="cat-list">
+    <div class="cat-row cat-org cat-headrow"><span></span><span>Name</span><span>Filter label</span><span>Form wording</span><span>Colour</span><span>In use</span><span></span></div>
+    <% orgCats.forEach((c, i) => { const n = used.org[c.key] || 0; %>
+    <form class="cat-row cat-org" method="post" action="/admin/categories/org/<%= c.key %>">
+      <label class="fld"><span class="sr">Name</span><input name="label" value="<%= c.label %>" maxlength="40" required></label>
+      <label class="fld"><span class="sr">Filter label</span><input name="plural" value="<%= c.plural || '' %>" maxlength="40" placeholder="Same as name"></label>
+      <label class="fld"><span class="sr">Form wording</span><input name="hint" value="<%= c.hint || '' %>" maxlength="80" placeholder="Same as name"></label>
+      <label class="fld cat-color"><span class="sr">Colour</span><span class="dot-prev" style="background:<%= (COLORS[c.color] || COLORS.purple).hex %>"></span><select name="color"><% Object.entries(COLORS).forEach(([k, v]) => { %><option value="<%= k %>" <%= c.color === k ? 'selected' : '' %>><%= v.name %></option><% }) %></select></label>
+      <small class="cat-use"><%= n %> listing<%= n === 1 ? '' : 's' %></small>
+      <span class="row-actions">
+        <button class="ab ab-indigo" name="action" value="save"><%- icon('check', 15) %>Save</button>
+        <button class="ab ab-danger" name="action" value="delete" aria-label="Delete" data-confirm-btn="Delete &quot;<%= c.label %>&quot;?"><%- icon('trash', 15) %></button>
+      </span>
+      <span class="cat-move">
+        <button class="mv" name="action" value="up" <%= i === 0 ? 'disabled' : '' %> aria-label="Move up">&#9650;</button>
+        <button class="mv" name="action" value="down" <%= i === orgCats.length - 1 ? 'disabled' : '' %> aria-label="Move down">&#9660;</button>
+      </span>
+    </form>
+    <% }) %>
+    <form class="cat-row cat-org cat-new" method="post" action="/admin/categories/org/add">
+      <span></span>
+      <label class="fld"><span class="sr">New type name</span><input name="label" maxlength="40" placeholder="New type, e.g. Sports club" required></label>
+      <label class="fld"><span class="sr">Filter label</span><input name="plural" maxlength="40" placeholder="e.g. Sports clubs"></label>
+      <label class="fld"><span class="sr">Form wording</span><input name="hint" maxlength="80" placeholder="e.g. Football, netball or running club"></label>
+      <label class="fld cat-color"><span class="sr">Colour</span><span class="dot-prev" style="background:<%= COLORS.magenta.hex %>"></span><select name="color"><% Object.entries(COLORS).forEach(([k, v]) => { %><option value="<%= k %>" <%= k === 'magenta' ? 'selected' : '' %>><%= v.name %></option><% }) %></select></label>
+      <span></span>
+      <span class="row-actions"><button class="ab ab-coral"><%- icon('plus', 15) %>Add</button></span>
+    </form>
+  </div>
+  <p class="muted cat-foot">A category that's still in use can't be deleted. Move its events or listings to another one first. Renaming is always safe, because everything already filed under it moves with it.</p>
+</section>
+<script>
+  const ICON_SVG = <%- JSON.stringify(Object.fromEntries(ICONS.map(k => [k, icon(k, 18)]))) %>;
+  // Live preview of the icon and colour as you pick them
+  document.querySelectorAll(".cat-icon select").forEach(s => s.addEventListener("change", () => {
+    s.parentElement.querySelector(".ic-prev").innerHTML = ICON_SVG[s.value] || "";
+  }));
+  const HEX = <%- JSON.stringify(Object.fromEntries(Object.entries(COLORS).map(([k, v]) => [k, v.hex]))) %>;
+  document.querySelectorAll(".cat-color select").forEach(s => s.addEventListener("change", () => { s.parentElement.querySelector(".dot-prev").style.background = HEX[s.value]; }));
+</script>
+<%- include('partials/bottom') %>

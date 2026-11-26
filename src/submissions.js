@@ -9,7 +9,7 @@ const clean = (v, n = LIMITS.short) => String(v || "").trim().slice(0, n);
 const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v || "");
 const urlish = v => { v = clean(v, 300); if (!v) return ""; return /^https?:\/\//i.test(v) ? v : "https://" + v; };
 
-module.exports = function submissionsRouter({ records, content, mailer, INTERESTS, CONTACT, SITE }) {
+module.exports = function submissionsRouter({ records, content, mailer, cats, CONTACT, SITE }) {
   const r = express.Router();
   r.use(express.urlencoded({ extended: true, limit: "12mb" }));
   const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -19,7 +19,7 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
     const t = Date.now(), arr = (hits.get(ip) || []).filter(x => t - x < 15 * 60 * 1000);
     arr.push(t); hits.set(ip, arr); return arr.length > 5;
   };
-  const ORG_CATS = [["community", "Association or community group"], ["faith", "Church, mosque or fellowship"], ["food", "Restaurant, food or Ugandan business"], ["groups", "WhatsApp or Facebook group"]];
+  const ORG_CATS = () => cats.list("org").map(c => [c.key, c.hint || c.label]);
   const meta = t => ({ title: t + " — Kyoona Connect", description: "Share it with the Ugandan community on Kyoona Connect.", image: "/media/og-image.jpg" });
   async function photos(values, max) {
     const out = [];
@@ -41,7 +41,7 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
   r.post("/event", wrap(async (req, res) => {
     const b = req.body;
     const f = {
-      title: clean(b.title), date: clean(b.date, 10), time: clean(b.time, 40), category: INTERESTS.some(i => i.key === b.category) ? b.category : "",
+      title: clean(b.title), date: clean(b.date, 10), time: clean(b.time, 40), category: cats.has("event", b.category) ? b.category : "",
       price: clean(b.price, 60), ticketUrl: urlish(b.ticketUrl), description: clean(b.description, LIMITS.long),
       host: clean(b.host), name: clean(b.name), email: clean(b.email), phone: clean(b.phone, 40), notes: clean(b.notes, 600)
     };
@@ -61,11 +61,11 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
   }));
 
   // ---------- Add a listing ----------
-  r.get("/listing", (req, res) => res.render("submit-listing", { f: {}, errors: [], cats: ORG_CATS, meta: meta("Add a listing") }));
+  r.get("/listing", (req, res) => res.render("submit-listing", { f: {}, errors: [], cats: ORG_CATS(), meta: meta("Add a listing") }));
   r.post("/listing", wrap(async (req, res) => {
     const b = req.body;
     const f = {
-      name: clean(b.name), category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community", 
+      name: clean(b.name), category: cats.has("org", b.category) ? b.category : cats.first("org"), 
       phone: clean(b.phone, 40), website: urlish(b.website), description: clean(b.description, LIMITS.long), meets: clean(b.meets, 60),
       contactName: clean(b.contactName), contactEmail: clean(b.contactEmail), role: clean(b.role), notes: clean(b.notes, 600)
     };
@@ -79,7 +79,7 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
     if (!f.contactName) errors.push("Tell us your name.");
     if (!emailOk(f.contactEmail)) errors.push("Add an email we can reach you on.");
     if (!errors.length && limited(req.ip)) errors.push("Too many submissions from here. Try again in a few minutes.");
-    if (errors.length) return res.status(400).render("submit-listing", { f, errors, cats: ORG_CATS, meta: meta("Add a listing") });
+    if (errors.length) return res.status(400).render("submit-listing", { f, errors, cats: ORG_CATS(), meta: meta("Add a listing") });
     const images = await photos(b.photos, 4);
     await save("listing", { ...f, images }, { name: f.contactName, email: f.contactEmail, role: f.role });
     res.redirect("/submit/thanks?t=listing");

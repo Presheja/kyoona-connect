@@ -23,7 +23,7 @@
         <h2>The organization</h2>
         <dl class="kv">
           <dt>Name</dt><dd><%= d.name %></dd>
-          <dt>Type</dt><dd><%= d.category %></dd>
+          <dt>Type</dt><dd><%= catLabel('org', d.category) %></dd>
           <dt>Description</dt><dd class="pre"><%= d.description %></dd>
           <dt>Meets / opens</dt><dd><%= d.meets || '—' %></dd>
           <dt>Building</dt><dd><%= d.placeName || '—' %></dd>

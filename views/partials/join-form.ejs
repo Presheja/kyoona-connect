@@ -10,8 +10,8 @@
   </label>
   <fieldset class="vibes">
     <legend>What gets you out of the house? <em>Pick all that apply</em></legend>
-    <% interests.forEach(i => { %>
-      <label class="vibe"><input type="checkbox" name="interests" value="<%= i.key %>" <%= (typeof form !== 'undefined' && (form.interests||[]).includes(i.key)) ? 'checked' : '' %>><span><%- icon(i.key, 15) %><%= i.label %></span></label>
+    <% joinInterests.forEach(i => { %>
+      <label class="vibe"><input type="checkbox" name="interests" value="<%= i.key %>" <%= (typeof form !== 'undefined' && (form.interests||[]).includes(i.key)) ? 'checked' : '' %>><span><%- icon(i.icon, 15) %><%= i.label %></span></label>
     <% }) %>
   </fieldset>
   <label class="consent"><input type="checkbox" name="consent" value="yes" required <%= (typeof form !== 'undefined' && form.consent) ? 'checked' : '' %>>

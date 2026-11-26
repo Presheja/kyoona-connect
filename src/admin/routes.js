@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const PAGES = require("./pages");
 const L = require("../location");
 
-module.exports = function adminRouter({ store, records, content, mailer, INTERESTS, CITIES, SITE, CONTACT, SECRET, ADMIN_PASSWORD }) {
+module.exports = function adminRouter({ store, records, content, mailer, cats, CITIES, SITE, CONTACT, SECRET, ADMIN_PASSWORD }) {
   const r = express.Router();
   const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -115,7 +115,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     const s = await records.get("submission", req.params.id);
     if (!s) return next();
     const org = s.type === "update" ? await records.get("org", s.data.orgId) : null;
-    page(res, "submission", "submissions", { s, org, TYPE_LABEL, interests: INTERESTS });
+    page(res, "submission", "submissions", { s, org, TYPE_LABEL, interests: cats.list("event") });
   }));
   async function tell(s, heading, message, url, cta) {
     if (!s.submitter || !s.submitter.email) return;
@@ -129,7 +129,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       let id = records.slugify(`${d.title}-${d.date.slice(0, 4)}`);
       if (await records.get("event", id)) id += "-" + crypto.randomBytes(2).toString("hex");
       await records.put("event", id, {
-        slug: id, title: d.title, subtitle: "", kicker: "", category: d.category || "nightlife", status: "draft", featured: false,
+        slug: id, title: d.title, subtitle: "", kicker: "", category: cats.has("event", d.category) ? d.category : cats.first("event"), status: "draft", featured: false,
         date: d.date, time: d.time, dateConfirmed: true, venue: d.venue, address: d.address, town: d.town || "", state: d.state || "", zip: d.zip || "", locVersion: 1,
         host: d.host || d.name, contactEmail: d.email, contactPhone: d.phone, price: d.price || "See details", ticketUrl: d.ticketUrl,
         art: "purple", image: d.image || "", description: d.description, fromSubmission: s.id
@@ -187,14 +187,14 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     };
     list = list.filter(e => f === "all" ? true : f === "past" ? e.past : f === "draft" ? e.status === "draft" : f === "featured" ? e.featured : !e.past && e.status !== "draft");
     if (q) list = list.filter(e => (e.title + " " + e.venue + " " + e.host).toLowerCase().includes(q));
-    page(res, "events", "events", { list, f, q: req.query.q || "", counts, interests: INTERESTS });
+    page(res, "events", "events", { list, f, q: req.query.q || "", counts, interests: cats.list("event") });
   }));
-  const blankEvent = { title: "", subtitle: "", kicker: "", category: "nightlife", status: "draft", featured: false, date: "", time: "", dateConfirmed: true, town: "", state: "MA", zip: "", venue: "", address: "", host: "", contactEmail: "", contactPhone: "", price: "", ticketUrl: "", art: "purple", image: "", description: "" };
-  r.get("/events/new", (req, res) => page(res, "event-form", "events", { ev: blankEvent, isNew: true, interests: INTERESTS }));
+  const blankEvent = () => ({ title: "", subtitle: "", kicker: "", category: cats.first("event"), status: "draft", featured: false, date: "", time: "", dateConfirmed: true, town: "", state: "MA", zip: "", venue: "", address: "", host: "", contactEmail: "", contactPhone: "", price: "", ticketUrl: "", art: "purple", image: "", description: "" });
+  r.get("/events/new", (req, res) => page(res, "event-form", "events", { ev: blankEvent(), isNew: true, interests: cats.list("event") }));
   r.get("/events/:id/edit", wrap(async (req, res, next) => {
     const ev = await records.get("event", req.params.id);
     if (!ev) return next();
-    page(res, "event-form", "events", { ev: { ...blankEvent, ...ev, state: ev.state || (ev.city === "boston" ? "MA" : "") }, isNew: false, interests: INTERESTS });
+    page(res, "event-form", "events", { ev: { ...blankEvent(), ...ev, state: ev.state || (ev.city === "boston" ? "MA" : "") }, isNew: false, interests: cats.list("event") });
   }));
   r.post("/events/save", wrap(async (req, res) => {
     const b = req.body;
@@ -212,7 +212,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     const ev = {
       ...old, slug: id,
       title, subtitle: (b.subtitle || "").trim(), kicker: (b.kicker || "").trim(),
-      category: INTERESTS.some(i => i.key === b.category) ? b.category : "nightlife",
+      category: cats.has("event", b.category) ? b.category : cats.first("event"),
       status: ["draft", "published", "cancelled"].includes(b.status) ? b.status : "draft",
       featured: b.featured === "on", date: b.date, time: (b.time || "").trim(), dateConfirmed: b.dateConfirmed === "on",
       venue: loc.placeName, address: loc.address, town: loc.town, state: loc.state, zip: loc.zip, locVersion: 1,
@@ -246,22 +246,22 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
   }));
 
   // ---------- ORGANIZATIONS ----------
-  const ORG_CATS = [["community", "Association"], ["faith", "Church & fellowship"], ["food", "Food & business"], ["groups", "Group"]];
+  const ORG_CATS = () => cats.list("org").map(c => [c.key, c.label]);
   r.get("/organizations", wrap(async (req, res) => {
     const f = req.query.f || "all", q = (req.query.q || "").toLowerCase();
     const all = await content.allOrgs();
     const counts = { all: all.length, unconfirmed: all.filter(o => !o.verified).length, hidden: all.filter(o => o.status === "hidden").length };
-    ORG_CATS.forEach(([k]) => counts[k] = all.filter(o => o.category === k).length);
+    ORG_CATS().forEach(([k]) => counts[k] = all.filter(o => o.category === k).length);
     let list = all.filter(o => f === "all" ? true : f === "unconfirmed" ? !o.verified : f === "hidden" ? o.status === "hidden" : o.category === f);
     if (q) list = list.filter(o => (o.name + " " + o.town + " " + o.description).toLowerCase().includes(q));
-    page(res, "organizations", "organizations", { list, f, q: req.query.q || "", counts, cats: ORG_CATS });
+    page(res, "organizations", "organizations", { list, f, q: req.query.q || "", counts, cats: ORG_CATS() });
   }));
-  const blankOrg = { name: "", category: "community", placeName: "", zip: "", state: "MA", meets: "", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" };
-  r.get("/organizations/new", (req, res) => page(res, "org-form", "organizations", { org: blankOrg, isNew: true, cats: ORG_CATS }));
+  const blankOrg = () => ({ name: "", category: cats.first("org"), placeName: "", zip: "", state: "MA", meets: "", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" });
+  r.get("/organizations/new", (req, res) => page(res, "org-form", "organizations", { org: blankOrg(), isNew: true, cats: ORG_CATS() }));
   r.get("/organizations/:id/edit", wrap(async (req, res, next) => {
     const org = await records.get("org", req.params.id);
     if (!org) return next();
-    page(res, "org-form", "organizations", { org: { ...blankOrg, ...org, state: org.state || (org.city === "boston" ? "MA" : "") }, isNew: false, cats: ORG_CATS });
+    page(res, "org-form", "organizations", { org: { ...blankOrg(), ...org, state: org.state || (org.city === "boston" ? "MA" : "") }, isNew: false, cats: ORG_CATS() });
   }));
   r.post("/organizations/save", wrap(async (req, res) => {
     const b = req.body;
@@ -275,7 +275,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     const images = await keepImages(b.images, 4);
     const org = {
       ...old, name,
-      category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community",
+      category: cats.has("org", b.category) ? b.category : cats.first("org"),
       placeName: loc.placeName, address: loc.address, town: loc.town, state: loc.state, zip: loc.zip, locVersion: 1,
       phone: (b.phone || "").trim(), website: /^https?:\/\//.test(b.website || "") ? b.website.trim() : (b.website ? "https://" + b.website.trim() : ""),
       description: (b.description || "").trim(), meets: (b.meets || "").trim().slice(0, 60), images,
@@ -324,7 +324,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     all.forEach(m => counts[m.status]++);
     let list = f === "all" ? all : all.filter(m => m.status === f);
     if (q) list = list.filter(m => (m.email + " " + m.first_name + " " + m.city).toLowerCase().includes(q));
-    page(res, "members", "members", { list, f, q: req.query.q || "", counts, interests: INTERESTS });
+    page(res, "members", "members", { list, f, q: req.query.q || "", counts, interests: cats.list("event") });
   }));
   r.post("/members/action", wrap(async (req, res) => {
     const { email, action } = req.body;
@@ -350,7 +350,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
   r.get("/announcements", wrap(async (req, res) => {
     const history = (await records.list("announcement")).sort((a, b) => b.at.localeCompare(a.at));
     const members = (await store.list()).filter(m => m.status === "confirmed");
-    page(res, "announcements", "announcements", { events: await content.upcoming(), history, confirmedCount: members.length, interests: INTERESTS, preselect: req.query.event || "" });
+    page(res, "announcements", "announcements", { events: await content.upcoming(), history, confirmedCount: members.length, interests: cats.list("event"), preselect: req.query.event || "" });
   }));
   r.post("/announcements/send", wrap(async (req, res) => {
     const ev = await content.event(String(req.body.slug || ""));
@@ -370,6 +370,75 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     const at = new Date().toISOString();
     await records.put("announcement", at.replace(/[^0-9]/g, ""), { at, event: ev.slug, title: ev.title, audience, test, sent });
     go(res, "/admin/announcements", test ? `Test sent to ${CONTACT}.` : `Sent to ${sent} member${sent === 1 ? "" : "s"}.`);
+  }));
+
+  // ---------- CATEGORIES ----------
+  // Event categories (also the interests people tick when they join) and organization types.
+  const bad = (res, url, msg) => res.redirect(url + "?err=" + encodeURIComponent(msg));
+  const TYPE_NAME = { event: "event category", org: "organization type" };
+  const cleanCat = (t, b, old = {}) => {
+    const c = { ...old, label: String(b.label || "").trim().slice(0, 40) };
+    if (t === "event") {
+      c.icon = cats.ICONS.includes(b.icon) ? b.icon : "calendar";
+      c.join = b.join === "yes";
+    } else {
+      c.plural = String(b.plural || "").trim().slice(0, 40) || c.label;
+      c.hint = String(b.hint || "").trim().slice(0, 80);
+      c.color = cats.COLORS[b.color] ? b.color : "purple";
+    }
+    return c;
+  };
+  async function usage() {
+    const u = { event: {}, org: {}, members: {} };
+    const bump = (o, k) => { if (k) o[k] = (o[k] || 0) + 1; };
+    (await records.list("event")).forEach(e => bump(u.event, e.category));
+    (await records.list("org")).forEach(o => bump(u.org, o.category));
+    (await records.list("submission")).filter(x => x.status === "new").forEach(x => bump(u[x.type === "event" ? "event" : "org"], (x.data || {}).category));
+    (await store.list()).forEach(m => (m.interests || "").split(",").filter(Boolean).forEach(k => bump(u.members, k)));
+    return u;
+  }
+  r.get("/categories", wrap(async (req, res) => {
+    page(res, "categories", "categories", { evCats: cats.list("event"), orgCats: cats.list("org"), used: await usage(), COLORS: cats.COLORS, ICONS: cats.ICONS, catStyle: cats.style });
+  }));
+  r.post("/categories/:type/add", wrap(async (req, res) => {
+    const t = req.params.type;
+    if (!cats.TYPES.includes(t)) return bad(res, "/admin/categories", "Unknown list.");
+    const c = cleanCat(t, req.body);
+    if (!c.label) return bad(res, "/admin/categories", "Give the new " + TYPE_NAME[t] + " a name.");
+    const items = cats.list(t);
+    if (items.some(x => x.label.toLowerCase() === c.label.toLowerCase())) return bad(res, "/admin/categories", `"${c.label}" already exists.`);
+    let key = records.slugify(c.label).slice(0, 30) || "cat", n = 2;
+    while (key === "add" || items.some(x => x.key === key)) key = records.slugify(c.label).slice(0, 27) + "-" + n++;
+    await cats.save(t, [...items, { key, ...c }]);
+    go(res, "/admin/categories", `Added "${c.label}".`);
+  }));
+  r.post("/categories/:type/:key", wrap(async (req, res) => {
+    const { type: t, key } = req.params;
+    if (!cats.TYPES.includes(t) || !cats.has(t, key)) return bad(res, "/admin/categories", "That category no longer exists.");
+    const items = cats.list(t).map(c => ({ ...c }));
+    const i = items.findIndex(c => c.key === key);
+    const action = req.body.action;
+    if (action === "up" || action === "down") {
+      const j = action === "up" ? i - 1 : i + 1;
+      if (j >= 0 && j < items.length) [items[i], items[j]] = [items[j], items[i]];
+      await cats.save(t, items);
+      return go(res, "/admin/categories", "Order saved.");
+    }
+    if (action === "delete") {
+      const u = await usage();
+      const n = u[t][key] || 0;
+      if (n) return bad(res, "/admin/categories", `"${items[i].label}" is still used by ${n} ${t === "event" ? "event" : "listing"}${n === 1 ? "" : "s"} or pending submission${n === 1 ? "" : "s"}. Move them to another ${TYPE_NAME[t]} first.`);
+      if (items.length === 1) return bad(res, "/admin/categories", "Keep at least one " + TYPE_NAME[t] + ".");
+      const [gone] = items.splice(i, 1);
+      await cats.save(t, items);
+      return go(res, "/admin/categories", `Deleted "${gone.label}".`);
+    }
+    const c = cleanCat(t, req.body, items[i]);
+    if (!c.label) return bad(res, "/admin/categories", "A category needs a name.");
+    if (items.some((x, k) => k !== i && x.label.toLowerCase() === c.label.toLowerCase())) return bad(res, "/admin/categories", `"${c.label}" already exists.`);
+    items[i] = c;
+    await cats.save(t, items);
+    go(res, "/admin/categories", `Saved "${c.label}".`);
   }));
 
   // ---------- SETTINGS ----------

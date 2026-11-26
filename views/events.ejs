@@ -6,7 +6,7 @@
   <p class="lede">Nights out, church gatherings, family days and the conventions people travel for. Pick one. Go.</p>
   <div class="filter-bar" data-filter>
     <button class="chip is-on" data-cat="all">Everything</button>
-    <% interests.forEach(i => { if (upcoming.some(e => e.category === i.key)) { %><button class="chip" data-cat="<%= i.key %>"><%- icon(i.key, 15) %><%= i.label %></button><% } }) %>
+    <% interests.forEach(i => { if (upcoming.some(e => e.category === i.key)) { %><button class="chip" data-cat="<%= i.key %>"><%- icon(i.icon, 15) %><%= i.label %></button><% } }) %>
   </div>
   <div class="events-grid" data-filter-target>
     <% upcoming.forEach(ev => { %><div data-cat="<%= ev.category %>"><%- include('partials/event-card', { ev }) %></div><% }) %>

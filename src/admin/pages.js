@@ -10,6 +10,7 @@ module.exports = [
   { key: "organizations", label: "Organizations", icon: "building", href: "/admin/organizations" },
   { key: "members", label: "Community members", icon: "users", href: "/admin/members" },
   { key: "announcements", label: "Announcements", icon: "send", href: "/admin/announcements" },
+  { key: "categories", label: "Categories", icon: "tag", href: "/admin/categories" },
   { key: "settings", label: "Settings", icon: "settings", href: "/admin/settings" },
 
   // Later stages, from the original Kyoona Connect admin plan. Build when the stage arrives.
