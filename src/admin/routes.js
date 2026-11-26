@@ -278,7 +278,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community",
       placeName: loc.placeName, address: loc.address, town: loc.town, state: loc.state, zip: loc.zip, locVersion: 1,
       phone: (b.phone || "").trim(), website: /^https?:\/\//.test(b.website || "") ? b.website.trim() : (b.website ? "https://" + b.website.trim() : ""),
-      description: (b.description || "").trim(), meets: (b.meets || "").trim(), images,
+      description: (b.description || "").trim(), meets: (b.meets || "").trim().slice(0, 60), images,
       photosRepresentative: b.photosRepresentative === "on", verified: b.verified === "on",
       status: b.status === "hidden" ? "hidden" : "published", order: old.order ?? 999
     };

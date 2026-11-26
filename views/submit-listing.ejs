@@ -18,7 +18,7 @@
     <label class="field"><span>What is it? *</span>
       <select name="category"><% cats.forEach(([k,l]) => { %><option value="<%= k %>" <%= f.category === k ? 'selected' : '' %>><%= l %></option><% }) %></select></label>
     <label class="field"><span>Describe it for someone who just moved here *</span><textarea name="description" rows="4" required placeholder="Who it's for, what happens there, what to expect the first time."><%= f.description || '' %></textarea></label>
-    <label class="field"><span>When do you meet or open?</span><input name="meets" value="<%= f.meets || '' %>" placeholder="Sundays 11am, Luganda service"></label>
+    <label class="field"><span>Meets / opens</span><input name="meets" value="<%= f.meets || '' %>" placeholder="Sun 11am" maxlength="60"></label>
     <%- include('partials/location-fields', { f, required: true, showPlace: true, placeKey: 'placeName', placeLabel: 'Meets in a building with a different name?', placeHint: 'e.g. Covenant Church' }) %>
     <div class="field-row">
       <label class="field"><span>Phone</span><input name="phone" value="<%= f.phone || '' %>"></label>

@@ -24,7 +24,7 @@
       <label class="field"><span>New phone</span><input name="phone" value="<%= f.phone || '' %>"></label>
       <label class="field"><span>New website or Facebook page</span><input name="website" value="<%= f.website || '' %>" placeholder="https://"></label>
     </div>
-    <label class="field"><span>Service times / opening hours</span><input name="meets" value="<%= f.meets || '' %>" placeholder="Sundays 11am"></label>
+    <label class="field"><span>Meets / opens</span><input name="meets" value="<%= f.meets || '' %>" placeholder="Sun 11am" maxlength="60"></label>
     <label class="field"><span>Better description</span><textarea name="description" rows="3"><%= f.description || '' %></textarea></label>
     <div class="field"><span>Your real photos (up to 4)</span><%- include('partials/photo-upload', { name: 'photos', max: 4, label: 'Replace the photos', hint: 'These replace the current ones. First one is the cover.' }) %></div>
     <label class="consent"><input type="checkbox" name="closed" value="yes" <%= f.closed ? 'checked' : '' %>><span>This organization has closed or stopped meeting. Please remove the listing.</span></label>

@@ -66,7 +66,7 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
     const b = req.body;
     const f = {
       name: clean(b.name), category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community", 
-      phone: clean(b.phone, 40), website: urlish(b.website), description: clean(b.description, LIMITS.long), meets: clean(b.meets, 300),
+      phone: clean(b.phone, 40), website: urlish(b.website), description: clean(b.description, LIMITS.long), meets: clean(b.meets, 60),
       contactName: clean(b.contactName), contactEmail: clean(b.contactEmail), role: clean(b.role), notes: clean(b.notes, 600)
     };
     const { loc, errors: locErrors } = L.fromForm(b, { requireTownState: true });
@@ -97,7 +97,7 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
     const f = {
       org: b.org || "", changes: [].concat(b.changes || []),
       phone: clean(b.phone, 40), website: b.website ? urlish(b.website) : "", description: clean(b.description, LIMITS.long),
-      meets: clean(b.meets, 300), closed: b.closed === "yes", notes: clean(b.notes, 600),
+      meets: clean(b.meets, 60), closed: b.closed === "yes", notes: clean(b.notes, 600),
       contactName: clean(b.contactName), contactEmail: clean(b.contactEmail), role: clean(b.role)
     };
     const { loc, errors: locErrors } = L.fromForm(b);
