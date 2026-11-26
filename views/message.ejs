@@ -26,6 +26,12 @@
     <p class="eyebrow">Hmm</p><h1 class="display-title">THAT LINK <span class="accent-coral">DIDN'T WORK.</span></h1>
     <p class="lede">It may be old or incomplete. You can sign up again. It takes ten seconds.</p>
     <a class="btn btn-primary" href="/join">Join the community</a>
+  <% } else if (kind === 'submitted') { %>
+    <div class="done-burst big" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <p class="eyebrow">Got it</p>
+    <h1 class="display-title">THANK <span class="accent-coral">YOU.</span></h1>
+    <p class="lede"><%= subtype === 'event' ? "We'll review your event and let you know when it's live. Usually within a day or two." : subtype === 'update' ? "We'll check the changes and update the listing. We may email you to confirm." : "We'll review the listing and let you know when it's live." %></p>
+    <a class="btn btn-primary" href="<%= subtype === 'event' ? '/events' : '/cities/boston' %>"><%= subtype === 'event' ? 'See what else is on' : 'Find your people' %> <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
   <% } else if (kind === '404') { %>
     <p class="eyebrow">404</p><h1 class="display-title">THIS PAGE <span class="accent-coral">LEFT EARLY.</span></h1>
     <p class="lede">Like that one uncle at every party. Let's get you back.</p>

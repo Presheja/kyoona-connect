@@ -20,6 +20,7 @@ const mailer = require("./src/mailer");
 const icon = require("./src/icons");
 const records = require("./src/records");
 const adminRouter = require("./src/admin/routes");
+const submissionsRouter = require("./src/submissions");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,7 +44,9 @@ app.set("views", path.join(__dirname, "views"));
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use("/admin", express.urlencoded({ extended: true, limit: "25mb" }));
-app.use(express.urlencoded({ extended: false, limit: "20kb" }));
+const smallForms = express.urlencoded({ extended: false, limit: "20kb" });
+// /submit forms carry photos, so their body is parsed (with a bigger limit) inside the submissions router
+app.use((req, res, next) => req.path.startsWith("/submit") ? next() : smallForms(req, res, next));
 app.use(express.json({ limit: "20kb" }));
 app.use(express.static(path.join(__dirname, "public"), { maxAge: "7d" }));
 
@@ -170,6 +173,9 @@ app.post("/unsubscribe/:token", async (req, res) => {
   const m = await store.setStatusByToken(req.params.token, "unsubscribed");
   res.render("message", { kind: m ? "unsubscribed" : "bad-link", meta: res.locals.meta });
 });
+
+// ---------- public forms ----------
+app.use("/submit", submissionsRouter({ records, content, mailer, INTERESTS, CONTACT, SITE }));
 
 // ---------- admin portal (see src/admin) ----------
 app.use("/admin", adminRouter({ store, records, content, mailer, INTERESTS, CITIES, SITE, CONTACT, SECRET, ADMIN_PASSWORD }));

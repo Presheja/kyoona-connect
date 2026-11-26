@@ -1,0 +1,80 @@
+<% const d = s.data; const name = s.type === 'update' ? d.orgName : (d.title || d.name); %>
+<%- include('partials/top', { title: name, subtitle: TYPE_LABEL[s.type] + ' sent ' + s.at.slice(0,16).replace('T',' '), actions: '<a class="ab" href="/admin/submissions">Back to submissions</a>' }) %>
+<div class="form-layout">
+  <div class="form-main">
+    <% if (s.type === 'event') { %>
+      <section class="adm-card">
+        <h2>The event</h2>
+        <dl class="kv">
+          <dt>Name</dt><dd><%= d.title %></dd>
+          <dt>Date</dt><dd><%= d.date %><%= d.time ? ' · ' + d.time : '' %></dd>
+          <dt>Type</dt><dd><%= (interests.find(i => i.key === d.category) || {}).label || '—' %></dd>
+          <dt>Venue</dt><dd><%= d.venue || '—' %><%= d.address ? ', ' + d.address : '' %></dd>
+          <dt>Price</dt><dd><%= d.price || '—' %></dd>
+          <dt>Tickets</dt><dd><% if (d.ticketUrl) { %><a class="link" href="<%= d.ticketUrl %>" target="_blank" rel="noopener"><%= d.ticketUrl %></a><% } else { %>—<% } %></dd>
+          <dt>Hosted by</dt><dd><%= d.host || '—' %></dd>
+          <dt>Description</dt><dd class="pre"><%= d.description || '—' %></dd>
+          <% if (d.notes) { %><dt>Notes</dt><dd class="pre"><%= d.notes %></dd><% } %>
+        </dl>
+        <% if (d.image) { %><img class="sub-img" src="<%= d.image %>" alt="Poster"><% } %>
+      </section>
+    <% } else if (s.type === 'listing') { %>
+      <section class="adm-card">
+        <h2>The organization</h2>
+        <dl class="kv">
+          <dt>Name</dt><dd><%= d.name %></dd>
+          <dt>Type</dt><dd><%= d.category %></dd>
+          <dt>Description</dt><dd class="pre"><%= d.description %></dd>
+          <dt>Meets / opens</dt><dd><%= d.meets || '—' %></dd>
+          <dt>Town</dt><dd><%= d.town %></dd>
+          <dt>Address</dt><dd><%= d.address || '—' %></dd>
+          <dt>Phone</dt><dd><%= d.phone || '—' %></dd>
+          <dt>Website</dt><dd><% if (d.website) { %><a class="link" href="<%= d.website %>" target="_blank" rel="noopener"><%= d.website %></a><% } else { %>—<% } %></dd>
+          <% if (d.notes) { %><dt>Notes</dt><dd class="pre"><%= d.notes %></dd><% } %>
+        </dl>
+        <% if ((d.images || []).length) { %><div class="sub-imgs"><% d.images.forEach(src => { %><img src="<%= src %>" alt=""><% }) %></div><% } %>
+      </section>
+    <% } else { %>
+      <section class="adm-card">
+        <h2>Requested changes</h2>
+        <% if (d.closed) { %><div class="adm-flash warn">They say this organization has closed. Approving hides the listing.</div><% } %>
+        <table class="tbl diff">
+          <thead><tr><th>Field</th><th>Now on the site</th><th>Change to</th></tr></thead>
+          <tbody>
+            <% [['address','Address'],['phone','Phone'],['website','Website'],['meets','Meets / opens'],['description','Description']].forEach(([k,l]) => { if (d[k]) { %>
+              <tr><td><%= l %></td><td class="old"><%= (org && org[k]) || '—' %></td><td class="new"><%= d[k] %></td></tr>
+            <% } }) %>
+          </tbody>
+        </table>
+        <% if ((d.images || []).length) { %>
+          <h2 style="margin-top:1.2rem">New photos <small class="muted">replace the current ones</small></h2>
+          <div class="sub-imgs"><% d.images.forEach(src => { %><img src="<%= src %>" alt=""><% }) %></div>
+        <% } %>
+        <% if (d.notes) { %><h2 style="margin-top:1.2rem">Other notes</h2><p class="pre"><%= d.notes %></p><small class="muted">Notes aren't applied automatically. Make those edits on the listing after approving.</small><% } %>
+      </section>
+    <% } %>
+  </div>
+  <aside class="form-side">
+    <div class="adm-card sticky">
+      <h2>Sent by</h2>
+      <div class="who"><span class="av"><%= (s.submitter.name || '?')[0].toUpperCase() %></span><div><strong><%= s.submitter.name %></strong><small><%= s.submitter.role || '' %></small></div></div>
+      <p><a class="link" href="mailto:<%= s.submitter.email %>?subject=<%= encodeURIComponent('About your Kyoona Connect submission: ' + name) %>"><%= s.submitter.email %></a><%= s.submitter.phone ? ' · ' + s.submitter.phone : '' %></p>
+      <% if (s.status === 'new') { %>
+        <form method="post" action="/admin/submissions/<%= s.id %>/approve">
+          <label class="chk"><input type="checkbox" name="notify" checked><span>Email them when it's approved</span></label>
+          <button class="ab ab-coral wide" type="submit"><%- icon('check', 16) %><%= s.type === 'event' ? 'Approve, open as draft' : s.type === 'listing' ? 'Approve and list it' : 'Apply the changes' %></button>
+        </form>
+        <form method="post" action="/admin/submissions/<%= s.id %>/decline" class="stack" style="margin-top:.8rem">
+          <label class="fld"><span>Reason (for your records)</span><input name="reason" placeholder="Duplicate, not Ugandan community, spam..."></label>
+          <button class="ab wide" type="submit"><%- icon('x', 16) %>Decline</button>
+        </form>
+      <% } else { %>
+        <p><span class="pill st-<%= s.status === 'approved' ? 'published' : 'cancelled' %>"><%= s.status %></span> <small class="muted"><%= (s.decidedAt || '').slice(0,10) %></small></p>
+        <% if (s.result) { %><a class="ab ab-indigo wide" href="<%= s.result %>"><%- icon('edit', 16) %>Open what it created</a><% } %>
+        <% if (s.reason) { %><p class="muted">Reason: <%= s.reason %></p><% } %>
+        <form method="post" action="/admin/submissions/<%= s.id %>/delete" data-confirm="Delete this submission?"><button class="ab wide" type="submit"><%- icon('trash', 16) %>Delete submission</button></form>
+      <% } %>
+    </div>
+  </aside>
+</div>
+<%- include('partials/bottom') %>

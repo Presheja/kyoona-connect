@@ -9,6 +9,7 @@
         <label class="fld"><span>Type</span><select name="category"><% cats.forEach(([k,l]) => { %><option value="<%= k %>" <%= org.category === k ? 'selected' : '' %>><%= l %></option><% }) %></select></label>
       </div>
       <label class="fld"><span>Description</span><textarea name="description" rows="4" placeholder="What it is, who it's for, when they meet."><%= org.description %></textarea><small>The first two lines show on the card. The full text shows in the popup.</small></label>
+      <label class="fld"><span>When they meet or open</span><input name="meets" value="<%= org.meets || '' %>" placeholder="Sundays 11am, Luganda service"></label>
     </section>
 
     <section class="adm-card fsec">

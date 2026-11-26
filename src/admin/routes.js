@@ -38,6 +38,10 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
   });
   r.post("/logout", (req, res) => { res.setHeader("Set-Cookie", "kc_admin=; Path=/; Max-Age=0"); res.redirect("/admin/login"); });
   r.use((req, res, next) => isAdmin(req) ? next() : res.redirect("/admin/login"));
+  r.use(wrap(async (req, res, next) => {
+    res.locals.badges = { newSubmissions: (await records.list("submission")).filter(x => x.status === "new").length };
+    next();
+  }));
 
   const page = (res, view, key, data) => res.render("admin/" + view, { active: key, ...data });
   const go = (res, url, msg) => res.redirect(url + (url.includes("?") ? "&" : "?") + "ok=" + encodeURIComponent(msg));
@@ -85,12 +89,86 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       recent: members.slice(0, 6),
       nextEvents: events.filter(e => !e.past && e.status !== "cancelled").slice(0, 4),
       todo: [
+        ...(res.locals.badges.newSubmissions ? [{ text: `${res.locals.badges.newSubmissions} new submission${res.locals.badges.newSubmissions === 1 ? "" : "s"} to review`, href: "/admin/submissions" }] : []),
         ...events.filter(e => !e.past && !e.dateConfirmed && e.status === "published").map(e => ({ text: `"${e.title}" still has no confirmed date`, href: `/admin/events/${e.id}/edit` })),
         ...orgs.filter(o => !o.verified).slice(0, 4).map(o => ({ text: `Confirm details for ${o.name}`, href: `/admin/organizations/${o.id}/edit` })),
         ...(!mailer.configured ? [{ text: "Connect email (SMTP) so sign-ups get their confirmation", href: "/admin/settings" }] : []),
         ...(!store.useMysql ? [{ text: "Connect the MySQL database so data survives redeploys", href: "/admin/settings" }] : [])
       ]
     });
+  }));
+
+  // ---------- SUBMISSIONS (public forms) ----------
+  const TYPE_LABEL = { event: "Event", listing: "New listing", update: "Listing update" };
+  r.get("/submissions", wrap(async (req, res) => {
+    const f = req.query.f || "new", t = req.query.t || "all";
+    const all = (await records.list("submission")).sort((a, b) => b.at.localeCompare(a.at));
+    const counts = { new: 0, approved: 0, declined: 0, all: all.length };
+    all.forEach(x => counts[x.status] = (counts[x.status] || 0) + 1);
+    let list = f === "all" ? all : all.filter(x => x.status === f);
+    if (t !== "all") list = list.filter(x => x.type === t);
+    page(res, "submissions", "submissions", { list, f, t, counts, TYPE_LABEL });
+  }));
+  r.get("/submissions/:id", wrap(async (req, res, next) => {
+    const s = await records.get("submission", req.params.id);
+    if (!s) return next();
+    const org = s.type === "update" ? await records.get("org", s.data.orgId) : null;
+    page(res, "submission", "submissions", { s, org, TYPE_LABEL, interests: INTERESTS });
+  }));
+  async function tell(s, heading, message, url, cta) {
+    if (!s.submitter || !s.submitter.email) return;
+    try { await mailer.sendSubmitterUpdate(s.submitter.email, s.submitter.name, heading, message, url, cta); } catch (e) { console.error("notify submitter", e.message); }
+  }
+  r.post("/submissions/:id/approve", wrap(async (req, res) => {
+    const s = await records.get("submission", req.params.id);
+    if (!s || s.status !== "new") return res.redirect("/admin/submissions");
+    const d = s.data, notify = req.body.notify === "on";
+    if (s.type === "event") {
+      let id = records.slugify(`${d.title}-${d.date.slice(0, 4)}`);
+      if (await records.get("event", id)) id += "-" + crypto.randomBytes(2).toString("hex");
+      await records.put("event", id, {
+        slug: id, title: d.title, subtitle: "", kicker: "", category: d.category || "nightlife", status: "draft", featured: false,
+        date: d.date, time: d.time, dateConfirmed: true, city: "boston", venue: d.venue, address: d.address,
+        host: d.host || d.name, contactEmail: d.email, contactPhone: d.phone, price: d.price || "See details", ticketUrl: d.ticketUrl,
+        art: "purple", image: d.image || "", description: d.description, fromSubmission: s.id
+      });
+      await records.put("submission", s.id, { ...s, status: "approved", result: `/admin/events/${id}/edit`, decidedAt: new Date().toISOString() });
+      if (notify) await tell(s, "Your event is on Kyoona Connect", `thank you for sharing ${d.title}. We've added it and it will be live shortly.`, `${SITE}/events`, "See the events");
+      return go(res, `/admin/events/${id}/edit`, "Created as a draft from the submission. Check it, then set it to Published.");
+    }
+    if (s.type === "listing") {
+      let id = records.slugify(d.name);
+      if (await records.get("org", id)) id += "-" + crypto.randomBytes(2).toString("hex");
+      await records.put("org", id, {
+        name: d.name, category: d.category, city: "boston", town: d.town, address: d.address, phone: d.phone, website: d.website,
+        description: d.description, meets: d.meets, images: d.images || [], photosRepresentative: false, verified: true, status: "published", order: 999, fromSubmission: s.id
+      });
+      await records.put("submission", s.id, { ...s, status: "approved", result: `/admin/organizations/${id}/edit`, decidedAt: new Date().toISOString() });
+      if (notify) await tell(s, "You're listed on Kyoona Connect", `${d.name} is now on Find your people. Newcomers can find you there.`, `${SITE}/cities/boston`, "See your listing");
+      return go(res, `/admin/organizations/${id}/edit`, `${d.name} is now listed.`);
+    }
+    if (s.type === "update") {
+      const o = await records.get("org", d.orgId);
+      if (!o) return fail(res, `/admin/submissions/${s.id}`, "That listing no longer exists.");
+      const next = { ...o, verified: true };
+      ["address", "phone", "website", "description", "meets"].forEach(k => { if (d[k]) next[k] = d[k]; });
+      if ((d.images || []).length) { next.images = d.images; next.photosRepresentative = false; }
+      if (d.closed) next.status = "hidden";
+      await records.put("org", o.id, next);
+      await records.put("submission", s.id, { ...s, status: "approved", result: `/admin/organizations/${o.id}/edit`, decidedAt: new Date().toISOString() });
+      if (notify) await tell(s, "Your listing is updated", `the changes to ${o.name} are now live on Kyoona Connect.`, `${SITE}/cities/boston`, "See the listing");
+      return go(res, `/admin/organizations/${o.id}/edit`, `Changes applied to ${o.name}.`);
+    }
+    res.redirect("/admin/submissions");
+  }));
+  r.post("/submissions/:id/decline", wrap(async (req, res) => {
+    const s = await records.get("submission", req.params.id);
+    if (s) await records.put("submission", s.id, { ...s, status: "declined", reason: String(req.body.reason || "").slice(0, 300), decidedAt: new Date().toISOString() });
+    go(res, "/admin/submissions", "Declined.");
+  }));
+  r.post("/submissions/:id/delete", wrap(async (req, res) => {
+    await records.del("submission", req.params.id);
+    go(res, "/admin/submissions?f=" + (req.body.f || "new"), "Deleted.");
   }));
 
   // ---------- EVENTS ----------
@@ -172,7 +250,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     if (q) list = list.filter(o => (o.name + " " + o.town + " " + o.description).toLowerCase().includes(q));
     page(res, "organizations", "organizations", { list, f, q: req.query.q || "", counts, cats: ORG_CATS });
   }));
-  const blankOrg = { name: "", category: "community", city: "boston", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" };
+  const blankOrg = { name: "", category: "community", city: "boston", meets: "", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" };
   r.get("/organizations/new", (req, res) => page(res, "org-form", "organizations", { org: blankOrg, isNew: true, cats: ORG_CATS }));
   r.get("/organizations/:id/edit", wrap(async (req, res, next) => {
     const org = await records.get("org", req.params.id);
@@ -192,7 +270,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community",
       city: b.city || "boston", town: (b.town || "").trim(), address: (b.address || "").trim(),
       phone: (b.phone || "").trim(), website: /^https?:\/\//.test(b.website || "") ? b.website.trim() : (b.website ? "https://" + b.website.trim() : ""),
-      description: (b.description || "").trim(), images,
+      description: (b.description || "").trim(), meets: (b.meets || "").trim(), images,
       photosRepresentative: b.photosRepresentative === "on", verified: b.verified === "on",
       status: b.status === "hidden" ? "hidden" : "published", order: old.order ?? 999
     };

@@ -1,0 +1,4 @@
+<div class="pub-uploader" data-uploader data-max="<%= max %>" data-name="<%= name %>">
+  <div class="pu-thumbs" data-thumbs></div>
+  <label class="pu-drop"><input type="file" accept="image/*" <%= max > 1 ? 'multiple' : '' %> data-file hidden><%- icon('upload', 20) %><span><b><%= label %></b><small><%= hint %></small></span></label>
+</div>

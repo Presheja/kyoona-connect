@@ -1,0 +1,42 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="page-shell form-page">
+  <div class="fp-intro">
+    <p class="eyebrow">Already listed</p>
+    <h1 class="display-title">UPDATE YOUR <span class="accent-coral">DETAILS.</span></h1>
+    <p class="lede">Moved? New service times? Better photos? Only fill in what's changed. We check every update with the person who sent it before it goes live.</p>
+    <a class="fp-switch" href="/submit/listing">
+      <%- icon('plus', 18) %>
+      <span><b>Not listed yet?</b>Add your organization instead.</span>
+      <%- icon('arrow', 16) %>
+    </a>
+  </div>
+  <form class="join-card fp-form" method="post" action="/submit/update" data-pub-form>
+    <%- include('partials/form-errors', { errors }) %>
+    <h3 class="fp-sec">Which listing?</h3>
+    <label class="field"><span>Listing *</span>
+      <select name="org" required><option value="">Choose your organization</option><% orgs.forEach(o => { %><option value="<%= o.id %>" <%= f.org === o.id ? 'selected' : '' %>><%= o.name %> (<%= o.town %>)</option><% }) %></select></label>
+
+    <h3 class="fp-sec">What's changed? <small>Leave anything that's still right empty</small></h3>
+    <label class="field"><span>New address</span><input name="address" value="<%= f.address || '' %>"></label>
+    <div class="field-row">
+      <label class="field"><span>New phone</span><input name="phone" value="<%= f.phone || '' %>"></label>
+      <label class="field"><span>New website or Facebook page</span><input name="website" value="<%= f.website || '' %>" placeholder="https://"></label>
+    </div>
+    <label class="field"><span>Service times / opening hours</span><input name="meets" value="<%= f.meets || '' %>" placeholder="Sundays 11am"></label>
+    <label class="field"><span>Better description</span><textarea name="description" rows="3"><%= f.description || '' %></textarea></label>
+    <div class="field"><span>Your real photos (up to 4)</span><%- include('partials/photo-upload', { name: 'photos', max: 4, label: 'Replace the photos', hint: 'These replace the current ones. First one is the cover.' }) %></div>
+    <label class="consent"><input type="checkbox" name="closed" value="yes" <%= f.closed ? 'checked' : '' %>><span>This organization has closed or stopped meeting. Please remove the listing.</span></label>
+    <label class="field"><span>Anything else to fix?</span><textarea name="notes" rows="2" placeholder="Wrong name spelling, wrong category..."><%= f.notes || '' %></textarea></label>
+
+    <h3 class="fp-sec">About you</h3>
+    <div class="field-row">
+      <label class="field"><span>Your name *</span><input name="contactName" value="<%= f.contactName || '' %>" required autocomplete="name"></label>
+      <label class="field"><span>How are you connected? *</span><input name="role" value="<%= f.role || '' %>" required placeholder="Pastor, owner, committee member"></label>
+    </div>
+    <label class="field"><span>Email *</span><input type="email" name="contactEmail" value="<%= f.contactEmail || '' %>" required autocomplete="email"><small>Private. We may email you to confirm the change.</small></label>
+    <input class="hp" type="text" name="website2" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn btn-primary btn-block" type="submit">Send update <span class="arrow-circle"><%- icon('arrow', 15) %></span></button>
+  </form>
+</main>
+<%- include('partials/footer') %>

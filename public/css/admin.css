@@ -232,3 +232,30 @@ h2{margin:0 0 1rem;font-size:1.02rem;color:var(--indigo)}
   .tbl{display:block;overflow-x:auto;white-space:nowrap}
   .thumbs{grid-template-columns:repeat(2,1fr)}
 }
+
+/* sidebar badge + submissions */
+.adm-link .badge{margin-left:auto;background:var(--gold);color:var(--indigo);font-size:.72rem;font-weight:700;min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center;padding:0 .4rem}
+.toolbar .tabs + .tabs{margin-left:auto}
+.sub-list{display:grid;gap:.6rem}
+.sub-row{display:grid;grid-template-columns:56px 1fr 220px 110px;gap:1rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:.7rem 1rem;transition:border-color .15s,box-shadow .15s}
+.sub-row:hover{border-color:var(--teal);box-shadow:0 6px 18px rgba(59,53,97,.08)}
+.sub-pic{width:56px;height:56px;border-radius:12px;background:var(--bg) center/cover;display:grid;place-items:center;color:var(--indigo)}
+.sub-main{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.sub-main strong{color:var(--indigo);font-size:.98rem}
+.sub-main small,.sub-from small,.sub-when small{color:var(--soft);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-type{font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.sub-type.t-event{color:var(--coral)}.sub-type.t-listing{color:var(--teal)}.sub-type.t-update{color:#8a6d00}
+.sub-from{display:flex;flex-direction:column;min-width:0}
+.sub-from b{font-weight:600;color:var(--indigo)}
+.sub-when{display:flex;flex-direction:column;align-items:flex-end;gap:.2rem}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:.55rem 1rem;margin:0}
+.kv dt{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);padding-top:.15rem}
+.kv dd{margin:0;color:var(--text)}
+.pre{white-space:pre-wrap;line-height:1.6}
+.sub-img{margin-top:1rem;max-width:320px;border-radius:12px;border:1px solid var(--line)}
+.sub-imgs{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-top:1rem}
+.sub-imgs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
+.diff td{vertical-align:top}
+.diff .old{color:var(--soft);text-decoration:line-through;text-decoration-color:rgba(221,115,115,.6)}
+.diff .new{color:#2c6d6d;font-weight:600}
+@media (max-width:820px){.sub-row{grid-template-columns:48px 1fr}.sub-from,.sub-when{display:none}.toolbar .tabs + .tabs{margin-left:0}.kv{grid-template-columns:1fr}}

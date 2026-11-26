@@ -91,4 +91,21 @@ async function sendEventAnnouncement(member, ev, eventUrl) {
   });
 }
 
-module.exports = { sendConfirm, sendEventAnnouncement, configured };
+async function sendAdminNotice(to, subject, url) {
+  if (!transport) return;
+  return send({
+    to, subject: "[Kyoona admin] " + subject,
+    text: `${subject}\n\nReview it: ${url}`,
+    html: shell({ preheader: subject, heading: "New submission", bodyHtml: `<p style="margin:0">${esc(subject)}</p>`, ctaText: "Review it", ctaUrl: url, footerHtml: "" })
+  });
+}
+
+async function sendSubmitterUpdate(to, name, heading, message, url, ctaText) {
+  return send({
+    to, subject: heading,
+    text: `${name ? name + ", " : ""}${message}\n\n${url}`,
+    html: shell({ preheader: message, heading, bodyHtml: `<p style="margin:0">${esc(name ? name + ", " : "")}${esc(message)}</p>`, ctaText, ctaUrl: url, footerHtml: "" })
+  });
+}
+
+module.exports = { sendConfirm, sendEventAnnouncement, sendAdminNotice, sendSubmitterUpdate, configured };

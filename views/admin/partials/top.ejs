@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex">
   <title><%= typeof title !== 'undefined' ? title + ' · ' : '' %>Kyoona Connect Admin</title>
   <link rel="icon" href="/icons/favicon.ico" sizes="any">
-  <link rel="stylesheet" href="/css/admin.css?v=2">
+  <link rel="stylesheet" href="/css/admin.css?v=3">
   <script src="/js/admin.js?v=1" defer></script>
 </head>
 <body class="adm">
@@ -17,7 +17,7 @@
       <% if (p.soon) { %>
         <span class="adm-link soon" title="Coming in a later stage"><%- icon(p.icon, 18) %><span><%= p.label %></span><em>Later</em></span>
       <% } else { %>
-        <a class="adm-link <%= active === p.key ? 'on' : '' %>" href="<%= p.href %>"><%- icon(p.icon, 18) %><span><%= p.label %></span></a>
+        <a class="adm-link <%= active === p.key ? 'on' : '' %>" href="<%= p.href %>"><%- icon(p.icon, 18) %><span><%= p.label %></span><% if (p.badge && badges && badges[p.badge]) { %><b class="badge"><%= badges[p.badge] %></b><% } %></a>
       <% } %>
     <% }) %>
   </nav>

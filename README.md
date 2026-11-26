@@ -47,6 +47,7 @@ Log in with `ADMIN_PASSWORD`. The sidebar follows the original Kyoona Connect ad
 | Page | What you do there |
 |---|---|
 | Dashboard | Member counts, sign-ups per week, what needs attention, next events |
+| Submissions | Everything sent through the site forms. Approve an event (opens as a draft), approve a new listing, or apply a listing update after comparing old and new. Decline with a reason. Optionally emails the person when it's approved |
 | Events | Create, edit, publish/draft, feature on the home page, delete. Upload a cover image |
 | Organizations | Add and edit Find your people listings with up to 4 photos, mark confirmed, hide |
 | Community members | Search and filter, resend confirmation, confirm, unsubscribe, delete, CSV export |
@@ -58,6 +59,14 @@ Tickets & orders, Member accounts, Communities and Reports & safety are shown gr
 **Adding a page for a new stage:** add one line to `src/admin/pages.js`, add its routes to `src/admin/routes.js` (each existing page is a self-contained section to copy), and create `views/admin/<page>.ejs` from `views/admin/_template.ejs`.
 
 **Where content lives:** events, organizations, photos, announcements and settings are stored in the MySQL database (tables `records` and `media`, created automatically). Uploaded photos are resized in the browser and stored in the database too, so redeploying never wipes them. `content/events.json` and `content/cities/boston.json` are only the starter content imported on the very first run. After that, edit everything in the admin.
+
+## Public forms
+
+- `/submit/event`: List your event (with poster upload)
+- `/submit/listing`: Add a listing (up to 4 photos), with a link to the update form
+- `/submit/update`: Update listing details. The "Is this yours?" link in each organization popup opens it with that listing already picked.
+
+All three have spam protection (a hidden trap field and a limit per visitor) and land in Admin → Submissions. If email is connected, you also get an alert for each new submission.
 
 ## How sign-up works
 

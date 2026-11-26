@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       $("[data-om-desc]").textContent = o.description;
       $("[data-om-addr]").textContent = o.address || o.town;
       $("[data-om-map]").href = o.map;
+      show("[data-om-meets-row]", !!o.meets); $("[data-om-meets]").textContent = o.meets || "";
       show("[data-om-phone-row]", !!o.phone);
       if (o.phone) { $("[data-om-phone]").textContent = o.phone; $("[data-om-phone-link]").href = "tel:" + o.phone.replace(/[^\d+]/g, ""); }
       show("[data-om-web-row]", !!o.website);
@@ -95,6 +96,51 @@ document.addEventListener("DOMContentLoaded", () => {
     $("[data-close]").addEventListener("click", () => modal.close());
     modal.addEventListener("click", e => { if (e.target === modal) modal.close(); });
   }
+
+
+  // Photo uploads on the public forms: shrink in the browser, then send with the form
+  const shrink = file => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      resolve(c.toDataURL("image/jpeg", 0.82));
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+  document.querySelectorAll("[data-uploader]").forEach(up => {
+    const max = +up.dataset.max, name = up.dataset.name;
+    const thumbs = up.querySelector("[data-thumbs]"), input = up.querySelector("[data-file]"), drop = up.querySelector(".pu-drop");
+    const refresh = () => drop.classList.toggle("full", thumbs.children.length >= max);
+    const add = async files => {
+      if (max === 1) thumbs.innerHTML = "";
+      const list = [...files].filter(f => f.type.startsWith("image/")).slice(0, max - thumbs.children.length);
+      up.classList.add("busy");
+      for (const f of list) {
+        try {
+          const data = await shrink(f);
+          const d = document.createElement("div");
+          d.className = "pu-thumb";
+          d.innerHTML = `<img alt=""><input type="hidden" name="${name}"><button type="button" aria-label="Remove">×</button>`;
+          d.querySelector("img").src = data; d.querySelector("input").value = data;
+          d.querySelector("button").addEventListener("click", () => { d.remove(); refresh(); });
+          thumbs.appendChild(d);
+        } catch { alert("Couldn't read " + f.name); }
+      }
+      up.classList.remove("busy"); refresh();
+    };
+    input.addEventListener("change", () => { add(input.files); input.value = ""; });
+    ["dragover", "dragenter"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("drag"); }));
+    ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("drag"); }));
+    drop.addEventListener("drop", e => add(e.dataTransfer.files));
+  });
+  document.querySelectorAll("form[data-pub-form]").forEach(f => f.addEventListener("submit", () => {
+    const b = f.querySelector("button[type=submit]"); b.disabled = true; b.firstChild.textContent = "Sending... ";
+  }));
 
   // Copy link buttons
   document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", async () => {

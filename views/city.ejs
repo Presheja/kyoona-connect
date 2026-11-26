@@ -50,15 +50,15 @@
     </div>
     <div class="org-empty" data-org-empty hidden>
       <h3>No match yet.</h3>
-      <p>Know a group, church or Ugandan business that should be here? <a class="text-link" href="mailto:<%= contact %>?subject=Add%20a%20listing">Tell us</a> and we'll add it.</p>
+      <p>Know a group, church or Ugandan business that should be here? <a class="text-link" href="/submit/listing">Add it</a> and we'll add it.</p>
     </div>
 
     <div class="org-add">
       <div>
         <h2>Run an association, church or Ugandan business?</h2>
-        <p>Get listed for free, or send us better photos and details for your page.</p>
+        <p>Get listed for free. Already listed? <a class="text-link" href="/submit/update">Update your details</a>.</p>
       </div>
-      <a class="btn btn-primary" href="mailto:<%= contact %>?subject=Add%20a%20listing">Get listed <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
+      <a class="btn btn-primary" href="/submit/listing">Get listed <span class="arrow-circle"><%- icon('arrow', 15) %></span></a>
     </div>
   </section>
 
@@ -83,6 +83,7 @@
     <h2 id="om-title" data-om-name></h2>
     <p class="om-desc" data-om-desc></p>
     <ul class="om-rows">
+      <li data-om-meets-row><span class="om-lbl">When</span><strong data-om-meets></strong></li>
       <li data-om-addr-row><span class="om-lbl">Address</span><strong data-om-addr></strong><a class="om-btn" data-om-map target="_blank" rel="noopener"><%- icon('pin', 15) %>Open in Maps</a></li>
       <li data-om-phone-row><span class="om-lbl">Phone</span><a class="om-btn" data-om-phone-link><%- icon('phone', 15) %><span data-om-phone></span></a></li>
       <li data-om-web-row><span class="om-lbl">Website</span><a class="om-btn" data-om-web-link target="_blank" rel="noopener"><%- icon('globe', 15) %><span data-om-web></span></a></li>
@@ -93,8 +94,8 @@
 
 <script type="application/json" id="org-data"><%- JSON.stringify(city.listings.map(l => ({
   name: l.name, cat: CAT[l.category], town: l.town, description: l.description,
-  address: l.address, phone: l.phone, website: l.website, images: (l.images || []).slice(0, 4),
+  address: l.address, meets: l.meets || '', phone: l.phone, website: l.website, images: (l.images || []).slice(0, 4),
   representative: !!l.photosRepresentative, map: mapUrl(l),
-  update: 'mailto:' + contact + '?subject=' + encodeURIComponent('Update listing: ' + l.name)
+  update: '/submit/update?org=' + encodeURIComponent(l.id || '')
 }))).replace(/</g, '\\u003c') %></script>
 <%- include('partials/footer') %>

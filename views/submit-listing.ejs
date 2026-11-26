@@ -1,0 +1,43 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="page-shell form-page">
+  <div class="fp-intro">
+    <p class="eyebrow">Find your people</p>
+    <h1 class="display-title">ADD A <span class="accent-coral">LISTING.</span></h1>
+    <p class="lede">Associations, churches, fellowships, restaurants, Ugandan businesses, and groups that welcome newcomers. Listing is free, always.</p>
+    <a class="fp-switch" href="/submit/update">
+      <%- icon('edit', 18) %>
+      <span><b>Already listed?</b>Update your address, photos, service times or anything else.</span>
+      <%- icon('arrow', 16) %>
+    </a>
+  </div>
+  <form class="join-card fp-form" method="post" action="/submit/listing" data-pub-form>
+    <%- include('partials/form-errors', { errors }) %>
+    <h3 class="fp-sec">The organization</h3>
+    <label class="field"><span>Name *</span><input name="name" value="<%= f.name || '' %>" required placeholder="e.g. Uganda Boston Community Association"></label>
+    <label class="field"><span>What is it? *</span>
+      <select name="category"><% cats.forEach(([k,l]) => { %><option value="<%= k %>" <%= f.category === k ? 'selected' : '' %>><%= l %></option><% }) %></select></label>
+    <label class="field"><span>Describe it for someone who just moved here *</span><textarea name="description" rows="4" required placeholder="Who it's for, what happens there, what to expect the first time."><%= f.description || '' %></textarea></label>
+    <label class="field"><span>When do you meet or open?</span><input name="meets" value="<%= f.meets || '' %>" placeholder="Sundays 11am, Luganda service"></label>
+    <div class="field-row">
+      <label class="field"><span>Town *</span><input name="town" value="<%= f.town || '' %>" required placeholder="Waltham"></label>
+      <label class="field"><span>Address</span><input name="address" value="<%= f.address || '' %>" placeholder="Street, town, ZIP"></label>
+    </div>
+    <div class="field-row">
+      <label class="field"><span>Phone</span><input name="phone" value="<%= f.phone || '' %>"></label>
+      <label class="field"><span>Website or Facebook page</span><input name="website" value="<%= f.website || '' %>" placeholder="https://"></label>
+    </div>
+    <div class="field"><span>Photos (up to 4)</span><%- include('partials/photo-upload', { name: 'photos', max: 4, label: 'Add photos', hint: 'Your building, people, food. The first one is the cover.' }) %></div>
+
+    <h3 class="fp-sec">About you</h3>
+    <div class="field-row">
+      <label class="field"><span>Your name *</span><input name="contactName" value="<%= f.contactName || '' %>" required autocomplete="name"></label>
+      <label class="field"><span>Your role</span><input name="role" value="<%= f.role || '' %>" placeholder="Pastor, owner, secretary, member"></label>
+    </div>
+    <label class="field"><span>Email *</span><input type="email" name="contactEmail" value="<%= f.contactEmail || '' %>" required autocomplete="email"><small>Private. We only use it if we have a question.</small></label>
+    <label class="field"><span>Anything else?</span><textarea name="notes" rows="2"><%= f.notes || '' %></textarea></label>
+    <input class="hp" type="text" name="website2" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn btn-primary btn-block" type="submit">Send for review <span class="arrow-circle"><%- icon('arrow', 15) %></span></button>
+  </form>
+</main>
+<%- include('partials/footer') %>

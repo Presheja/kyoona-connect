@@ -1,0 +1,29 @@
+<%- include('partials/top', { title: 'Submissions', subtitle: 'Events, listings and updates sent in through the site forms' }) %>
+<form class="toolbar" method="get">
+  <div class="tabs">
+    <% [['new','New'],['approved','Approved'],['declined','Declined'],['all','All']].forEach(([k,l]) => { %>
+      <a class="tab <%= f === k ? 'on' : '' %>" href="?f=<%= k %>&t=<%= t %>"><%= l %> <i><%= counts[k] || 0 %></i></a>
+    <% }) %>
+  </div>
+  <div class="tabs">
+    <% [['all','All types'],['event','Events'],['listing','New listings'],['update','Updates']].forEach(([k,l]) => { %>
+      <a class="tab <%= t === k ? 'on' : '' %>" href="?f=<%= f %>&t=<%= k %>"><%= l %></a>
+    <% }) %>
+  </div>
+</form>
+<div class="sub-list">
+  <% list.forEach(x => { const d = x.data; const pic = d.image || (d.images || [])[0]; %>
+    <a class="sub-row" href="/admin/submissions/<%= x.id %>">
+      <span class="sub-pic" <% if (pic) { %>style="background-image:url('<%= pic %>')"<% } %>><% if (!pic) { %><%- icon(x.type === 'event' ? 'calendar' : x.type === 'update' ? 'edit' : 'building', 20) %><% } %></span>
+      <span class="sub-main">
+        <span class="sub-type t-<%= x.type %>"><%= TYPE_LABEL[x.type] %></span>
+        <strong><%= x.type === 'update' ? d.orgName : (d.title || d.name) %></strong>
+        <small><%= x.type === 'event' ? (d.date + (d.venue ? ' · ' + d.venue : '')) : x.type === 'update' ? 'Change requested' + (d.closed ? ' · says it has closed' : '') : (d.town + ' · ' + (d.description || '').slice(0, 80)) %></small>
+      </span>
+      <span class="sub-from"><b><%= x.submitter.name %></b><small><%= x.submitter.email %></small></span>
+      <span class="sub-when"><span class="pill st-<%= x.status === 'new' ? 'pending' : x.status === 'approved' ? 'published' : 'cancelled' %>"><%= x.status %></span><small><%= x.at.slice(0,10) %></small></span>
+    </a>
+  <% }) %>
+</div>
+<% if (!list.length) { %><div class="adm-card empty"><h2><%= f === 'new' ? 'Inbox zero.' : 'Nothing here.' %></h2><p class="muted">New events, listings and updates from the site forms show up here.</p></div><% } %>
+<%- include('partials/bottom') %>

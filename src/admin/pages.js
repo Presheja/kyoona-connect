@@ -5,6 +5,7 @@
 // Set `soon: true` to show it greyed out in the sidebar until it's built.
 module.exports = [
   { key: "dashboard", label: "Dashboard", icon: "grid", href: "/admin" },
+  { key: "submissions", label: "Submissions", icon: "mail", href: "/admin/submissions", badge: "newSubmissions" },
   { key: "events", label: "Events", icon: "calendar", href: "/admin/events" },
   { key: "organizations", label: "Organizations", icon: "building", href: "/admin/organizations" },
   { key: "members", label: "Community members", icon: "users", href: "/admin/members" },
@@ -12,7 +13,7 @@ module.exports = [
   { key: "settings", label: "Settings", icon: "settings", href: "/admin/settings" },
 
   // Later stages, from the original Kyoona Connect admin plan. Build when the stage arrives.
-  { key: "tickets", label: "Tickets & orders", icon: "mail", href: "#", soon: true },
+  { key: "tickets", label: "Tickets & orders", icon: "link", href: "#", soon: true },
   { key: "users", label: "Member accounts", icon: "users", href: "#", soon: true },
   { key: "communities", label: "Communities", icon: "grid", href: "#", soon: true },
   { key: "reports", label: "Reports & safety", icon: "eye", href: "#", soon: true }

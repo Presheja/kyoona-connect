@@ -1,0 +1,50 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="page-shell form-page">
+  <div class="fp-intro">
+    <p class="eyebrow">For organizers</p>
+    <h1 class="display-title">LIST YOUR <span class="accent-coral">EVENT.</span></h1>
+    <p class="lede">Nights out, church gatherings, family days, conventions. If it brings Ugandans together, it belongs here. Listing is free.</p>
+    <ol class="fp-steps">
+      <li><b>Send the details</b>Fill in what you know. A poster helps a lot.</li>
+      <li><b>We review it</b>Usually within a day or two. We may email you a quick question.</li>
+      <li><b>It goes live</b>On the Events page, and we tell the community members who are into it.</li>
+    </ol>
+  </div>
+  <form class="join-card fp-form" method="post" action="/submit/event" data-pub-form>
+    <%- include('partials/form-errors', { errors }) %>
+    <h3 class="fp-sec">The event</h3>
+    <label class="field"><span>Event name *</span><input name="title" value="<%= f.title || '' %>" required placeholder="Kampala Nights"></label>
+    <div class="field-row">
+      <label class="field"><span>Date *</span><input type="date" name="date" value="<%= f.date || '' %>" required></label>
+      <label class="field"><span>Time</span><input name="time" value="<%= f.time || '' %>" placeholder="9:00 PM"></label>
+    </div>
+    <label class="field"><span>What kind of event?</span>
+      <select name="category"><option value="">Choose one</option><% interests.forEach(i => { %><option value="<%= i.key %>" <%= f.category === i.key ? 'selected' : '' %>><%= i.label %></option><% }) %></select></label>
+    <div class="field-row">
+      <label class="field"><span>Venue</span><input name="venue" value="<%= f.venue || '' %>" placeholder="Venue name"></label>
+      <label class="field"><span>Address</span><input name="address" value="<%= f.address || '' %>" placeholder="Street, town"></label>
+    </div>
+    <div class="field-row">
+      <label class="field"><span>Entry / ticket price</span><input name="price" value="<%= f.price || '' %>" placeholder="$25, Free"></label>
+      <label class="field"><span>Ticket link (if any)</span><input name="ticketUrl" value="<%= f.ticketUrl || '' %>" placeholder="https://"></label>
+    </div>
+    <label class="field"><span>Tell people about it</span><textarea name="description" rows="4" placeholder="What's happening, who it's for, dress code..."><%= f.description || '' %></textarea></label>
+    <div class="field"><span>Poster or photo</span><%- include('partials/photo-upload', { name: 'poster', max: 1, label: 'Upload your flyer', hint: 'JPG or PNG. We resize it for you.' }) %></div>
+
+    <h3 class="fp-sec">About you</h3>
+    <div class="field-row">
+      <label class="field"><span>Your name *</span><input name="name" value="<%= f.name || '' %>" required autocomplete="name"></label>
+      <label class="field"><span>Hosted by</span><input name="host" value="<%= f.host || '' %>" placeholder="Your organization, if any"></label>
+    </div>
+    <div class="field-row">
+      <label class="field"><span>Email *</span><input type="email" name="email" value="<%= f.email || '' %>" required autocomplete="email"></label>
+      <label class="field"><span>Phone / WhatsApp</span><input name="phone" value="<%= f.phone || '' %>" autocomplete="tel"></label>
+    </div>
+    <label class="field"><span>Anything else we should know?</span><textarea name="notes" rows="2"><%= f.notes || '' %></textarea></label>
+    <label class="consent"><input type="checkbox" name="agree" value="yes" required><span>I'm the organizer, or I have their permission to share this event. Your contact details stay private.</span></label>
+    <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn btn-primary btn-block" type="submit">Send for review <span class="arrow-circle"><%- icon('arrow', 15) %></span></button>
+  </form>
+</main>
+<%- include('partials/footer') %>
