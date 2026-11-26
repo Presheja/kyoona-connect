@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       $("[data-om-update]").href = o.update;
       $("[data-om-note]").hidden = !o.representative || !o.images.length;
       const main = $("[data-om-main]"), thumbs = $("[data-om-thumbs]");
-      const setMain = k => { main.src = o.images[k] || ""; main.hidden = !o.images[k]; thumbs.querySelectorAll("button").forEach((b, j) => b.classList.toggle("is-on", j === k)); };
+      const setMain = k => { main.src = o.images[k] || ""; main.hidden = !o.images[k]; main.parentElement.style.setProperty("--om-bg", o.images[k] ? `url("${o.images[k]}")` : "none"); thumbs.querySelectorAll("button").forEach((b, j) => b.classList.toggle("is-on", j === k)); };
       thumbs.innerHTML = o.images.length > 1 ? o.images.map((src, k) => `<button type="button" aria-label="Photo ${k + 1}"><img src="${src}" alt="" loading="lazy"></button>`).join("") : "";
       thumbs.querySelectorAll("button").forEach((b, k) => b.addEventListener("click", () => setMain(k)));
       setMain(0);
