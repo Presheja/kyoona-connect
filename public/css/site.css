@@ -525,3 +525,8 @@ th{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--so
 .org-loc select{font:inherit;font-size:.88rem;font-weight:600;color:var(--ink);background:#fff;border:1.5px solid #dcd6e2;border-radius:999px;padding:.6rem 2.2rem .6rem 1rem;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2325105a' stroke-width='3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center}
 .org-loc select:focus{outline:none;border-color:var(--coral)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.field-row.three{grid-template-columns:1.4fr 1.3fr .8fr}
+.fp-form .field select{font:inherit;font-size:1rem;font-weight:500;padding:.9rem 1rem;border-radius:14px;border:2px solid var(--line);background:var(--paper);color:var(--text)}
+.fp-note{margin:-.4rem 0 -.3rem;color:var(--soft);font-size:.9rem}
+@media (max-width:760px){.field-row.three{grid-template-columns:1fr}}

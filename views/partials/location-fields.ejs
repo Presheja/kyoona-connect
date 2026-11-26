@@ -1,0 +1,10 @@
+<%# Public form version. `f` is the form state, `required` whether city/state are required. %>
+<% if (typeof showPlace !== 'undefined' && showPlace) { %>
+<label class="field"><span><%= placeLabel %></span><input name="<%= placeKey %>" value="<%= f[placeKey] || '' %>" placeholder="<%= placeHint %>" maxlength="120"></label>
+<% } %>
+<label class="field"><span>Street address</span><input name="address" value="<%= f.address || '' %>" placeholder="133 School St" maxlength="160" autocomplete="address-line1"></label>
+<div class="field-row three">
+  <label class="field"><span>City / town<%= required ? ' *' : '' %></span><input name="town" value="<%= f.town || '' %>" placeholder="Waltham" maxlength="80" <%= required ? 'required' : '' %> autocomplete="address-level2"></label>
+  <label class="field"><span>State<%= required ? ' *' : '' %></span><%- include('state-select', { value: f.state || '', fieldName: 'state', required }) %></label>
+  <label class="field"><span>ZIP</span><input name="zip" value="<%= f.zip || '' %>" placeholder="02451" maxlength="10" inputmode="numeric" pattern="\d{4,5}(-\d{4})?|[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d" title="5-digit ZIP, like 02451" autocomplete="postal-code"></label>
+</div>

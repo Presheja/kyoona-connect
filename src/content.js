@@ -1,12 +1,15 @@
 // Public-facing content, read from the records the admin portal manages.
 const records = require("./records");
+const L = require("./location");
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function decorate(ev) {
   ev = { ...ev, state: ev.state || (ev.city === "boston" ? "MA" : "") };
-  ev.location = [ev.town, ev.state].filter(Boolean).join(", ");
+  ev.location = L.shortLocation(ev);
+  ev.fullAddress = L.fullAddress({ ...ev, placeName: ev.venue });
+  ev.mapLink = L.mapUrl({ ...ev, placeName: ev.venue }, ev.title);
   const d = new Date((ev.date || "2099-01-01") + "T12:00:00");
   const today = new Date(); today.setHours(0, 0, 0, 0);
   return {
@@ -34,9 +37,9 @@ async function event(slug) { const e = await records.get("event", slug); return 
 // Location is open: any town and state. Older records that only had the Boston area get "MA".
 const HOME_STATE = "MA";
 function withLocation(o) {
-  const state = (o.state || (o.city === "boston" ? HOME_STATE : "")).trim();
-  const location = [o.town, state].filter(Boolean).join(", ");
-  return { ...o, state, location };
+  const state = o.state || (o.city === "boston" ? HOME_STATE : "");
+  const r = { ...o, state };
+  return { ...r, location: L.shortLocation(r), streetLine: [r.address, L.cityLine(r)].filter(Boolean).join(", "), fullAddress: L.fullAddress(r), mapLink: L.mapUrl(r, r.name) };
 }
 async function allOrgs() {
   return (await records.list("org")).map(withLocation)

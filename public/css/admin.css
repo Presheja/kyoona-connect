@@ -259,3 +259,7 @@ h2{margin:0 0 1rem;font-size:1.02rem;color:var(--indigo)}
 .diff .old{color:var(--soft);text-decoration:line-through;text-decoration-color:rgba(221,115,115,.6)}
 .diff .new{color:#2c6d6d;font-weight:600}
 @media (max-width:820px){.sub-row{grid-template-columns:48px 1fr}.sub-from,.sub-when{display:none}.toolbar .tabs + .tabs{margin-left:0}.kv{grid-template-columns:1fr}}
+
+.loc-row{grid-template-columns:1.4fr 1.2fr .7fr}
+.fld select{font-weight:400;font-size:.92rem;padding:.65rem .8rem;border:1.5px solid var(--gray);border-radius:10px;background:#fff;color:var(--text);width:100%}
+.map-check{margin:-.3rem 0 1rem;font-size:.82rem}

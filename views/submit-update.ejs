@@ -18,7 +18,8 @@
       <select name="org" required><option value="">Choose your organization</option><% orgs.forEach(o => { %><option value="<%= o.id %>" <%= f.org === o.id ? 'selected' : '' %>><%= o.name %> (<%= o.town %>)</option><% }) %></select></label>
 
     <h3 class="fp-sec">What's changed? <small>Leave anything that's still right empty</small></h3>
-    <label class="field"><span>New address</span><input name="address" value="<%= f.address || '' %>"></label>
+    <p class="fp-note">Moved? Fill in the new location.</p>
+    <%- include('partials/location-fields', { f, required: false, showPlace: true, placeKey: 'placeName', placeLabel: 'Building name (if different from yours)', placeHint: 'e.g. Covenant Church' }) %>
     <div class="field-row">
       <label class="field"><span>New phone</span><input name="phone" value="<%= f.phone || '' %>"></label>
       <label class="field"><span>New website or Facebook page</span><input name="website" value="<%= f.website || '' %>" placeholder="https://"></label>

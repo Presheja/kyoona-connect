@@ -43,15 +43,7 @@
 
     <section class="adm-card fsec">
       <h2>Venue</h2>
-      <div class="row2">
-        <label class="fld"><span>Venue name</span><input name="venue" value="<%= ev.venue %>" placeholder="St. Mary's Parish"></label>
-      </div>
-      <label class="fld"><span>Address</span><input name="address" value="<%= ev.address %>" placeholder="133 School St"></label>
-      <div class="row2">
-        <label class="fld"><span>City / town</span><input name="town" value="<%= ev.town || '' %>" placeholder="Waltham"></label>
-        <label class="fld"><span>State</span><input name="state" value="<%= ev.state || '' %>" list="state-list" placeholder="MA" maxlength="40"></label>
-      </div>
-      <%- include('../partials/states-datalist') %>
+      <%- include('partials/location-fields', { o: ev, placeKey: 'venue', placeLabel: 'Venue name', placeHint: "St. Mary's Parish" }) %>
     </section>
 
     <section class="adm-card fsec">

@@ -1,0 +1,9 @@
+<%# Shared by the organization and event editors. `o` is the record, `placeKey` is "placeName" (orgs) or "venue" (events). %>
+<label class="fld"><span><%= placeLabel %></span><input name="<%= placeKey %>" value="<%= o[placeKey] || '' %>" placeholder="<%= placeHint %>" maxlength="120"><% if (placeKey === 'placeName') { %><small>Optional. Only if they meet in a building with a different name.</small><% } %></label>
+<label class="fld"><span>Street address</span><input name="address" value="<%= o.address || '' %>" placeholder="133 School St" maxlength="160"><small>Street line only. City, state and ZIP go below.</small></label>
+<div class="row3 loc-row">
+  <label class="fld"><span>City / town</span><input name="town" value="<%= o.town || '' %>" placeholder="Waltham" maxlength="80"></label>
+  <label class="fld"><span>State</span><%- include('../../partials/state-select', { value: o.state || '', fieldName: 'state' }) %></label>
+  <label class="fld"><span>ZIP</span><input name="zip" value="<%= o.zip || '' %>" placeholder="02451" maxlength="10" inputmode="numeric" pattern="\d{4,5}(-\d{4})?|[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d" title="5-digit ZIP, like 02451"></label>
+</div>
+<% if (o.town || o.address) { %><p class="map-check"><a class="link" href="<%= mapUrl(o, o.name || o.title) %>" target="_blank" rel="noopener">Check this location in Google Maps</a></p><% } %>

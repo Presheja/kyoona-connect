@@ -4,7 +4,6 @@
   const CAT = { community: 'Association', faith: 'Church & fellowship', food: 'Food & business', groups: 'Group' };
   const cats = [['community', 'Associations'], ['faith', 'Churches'], ['food', 'Food']].filter(([k]) => dir.listings.some(l => l.category === k));
   const STATES = { AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',DC:'Washington DC',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming' };
-  const mapUrl2 = l => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.address || (l.name + ', ' + l.location));
 %>
 <main>
   <section class="org-hero">
@@ -47,7 +46,7 @@
           <div class="org-info">
             <span class="org-cat"><%= CAT[l.category] %></span>
             <h3><%= l.name %></h3>
-            <p class="org-where"><%= l.address || l.location %></p>
+            <p class="org-where"><%= l.address ? l.address + ', ' + l.location : l.location %></p>
             <p class="org-desc"><%= l.description %></p>
             <div class="org-foot">
               <span class="org-status <%= l.verified ? 'ok' : '' %>"><%= l.verified ? 'Confirmed' : 'Details being confirmed' %></span>
@@ -103,8 +102,8 @@
 
 <script type="application/json" id="org-data"><%- JSON.stringify(dir.listings.map(l => ({
   name: l.name, cat: CAT[l.category], town: l.location, description: l.description,
-  address: l.address, meets: l.meets || '', phone: l.phone, website: l.website, images: (l.images || []).slice(0, 4),
-  representative: !!l.photosRepresentative, map: mapUrl2(l),
+  address: l.fullAddress, meets: l.meets || '', phone: l.phone, website: l.website, images: (l.images || []).slice(0, 4),
+  representative: !!l.photosRepresentative, map: l.mapLink,
   update: '/submit/update?org=' + encodeURIComponent(l.id || '')
 }))).replace(/</g, '\\u003c') %></script>
 <%- include('partials/footer') %>

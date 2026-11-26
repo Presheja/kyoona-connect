@@ -2,6 +2,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const PAGES = require("./pages");
+const L = require("../location");
 
 module.exports = function adminRouter({ store, records, content, mailer, INTERESTS, CITIES, SITE, CONTACT, SECRET, ADMIN_PASSWORD }) {
   const r = express.Router();
@@ -91,6 +92,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       todo: [
         ...(res.locals.badges.newSubmissions ? [{ text: `${res.locals.badges.newSubmissions} new submission${res.locals.badges.newSubmissions === 1 ? "" : "s"} to review`, href: "/admin/submissions" }] : []),
         ...events.filter(e => !e.past && !e.dateConfirmed && e.status === "published").map(e => ({ text: `"${e.title}" still has no confirmed date`, href: `/admin/events/${e.id}/edit` })),
+        ...orgs.filter(o => o.status !== "hidden" && (!o.town || !o.state)).map(o => ({ text: `${o.name} is missing its city or state`, href: `/admin/organizations/${o.id}/edit` })),
         ...orgs.filter(o => !o.verified).slice(0, 4).map(o => ({ text: `Confirm details for ${o.name}`, href: `/admin/organizations/${o.id}/edit` })),
         ...(!mailer.configured ? [{ text: "Connect email (SMTP) so sign-ups get their confirmation", href: "/admin/settings" }] : []),
         ...(!store.useMysql ? [{ text: "Connect the MySQL database so data survives redeploys", href: "/admin/settings" }] : [])
@@ -128,7 +130,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       if (await records.get("event", id)) id += "-" + crypto.randomBytes(2).toString("hex");
       await records.put("event", id, {
         slug: id, title: d.title, subtitle: "", kicker: "", category: d.category || "nightlife", status: "draft", featured: false,
-        date: d.date, time: d.time, dateConfirmed: true, town: d.town || "", state: d.state || "", venue: d.venue, address: d.address,
+        date: d.date, time: d.time, dateConfirmed: true, venue: d.venue, address: d.address, town: d.town || "", state: d.state || "", zip: d.zip || "", locVersion: 1,
         host: d.host || d.name, contactEmail: d.email, contactPhone: d.phone, price: d.price || "See details", ticketUrl: d.ticketUrl,
         art: "purple", image: d.image || "", description: d.description, fromSubmission: s.id
       });
@@ -140,7 +142,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       let id = records.slugify(d.name);
       if (await records.get("org", id)) id += "-" + crypto.randomBytes(2).toString("hex");
       await records.put("org", id, {
-        name: d.name, category: d.category, town: d.town, state: d.state || "", address: d.address, phone: d.phone, website: d.website,
+        name: d.name, category: d.category, placeName: d.placeName || "", address: d.address, town: d.town, state: d.state || "", zip: d.zip || "", locVersion: 1, phone: d.phone, website: d.website,
         description: d.description, meets: d.meets, images: d.images || [], photosRepresentative: false, verified: true, status: "published", order: 999, fromSubmission: s.id
       });
       await records.put("submission", s.id, { ...s, status: "approved", result: `/admin/organizations/${id}/edit`, decidedAt: new Date().toISOString() });
@@ -151,7 +153,8 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       const o = await records.get("org", d.orgId);
       if (!o) return fail(res, `/admin/submissions/${s.id}`, "That listing no longer exists.");
       const next = { ...o, verified: true };
-      ["address", "phone", "website", "description", "meets"].forEach(k => { if (d[k]) next[k] = d[k]; });
+      ["placeName", "address", "town", "state", "zip", "phone", "website", "description", "meets"].forEach(k => { if (d[k]) next[k] = d[k]; });
+      next.locVersion = 1;
       if ((d.images || []).length) { next.images = d.images; next.photosRepresentative = false; }
       if (d.closed) next.status = "hidden";
       await records.put("org", o.id, next);
@@ -186,7 +189,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     if (q) list = list.filter(e => (e.title + " " + e.venue + " " + e.host).toLowerCase().includes(q));
     page(res, "events", "events", { list, f, q: req.query.q || "", counts, interests: INTERESTS });
   }));
-  const blankEvent = { title: "", subtitle: "", kicker: "", category: "nightlife", status: "draft", featured: false, date: "", time: "", dateConfirmed: true, town: "", state: "MA", venue: "", address: "", host: "", contactEmail: "", contactPhone: "", price: "", ticketUrl: "", art: "purple", image: "", description: "" };
+  const blankEvent = { title: "", subtitle: "", kicker: "", category: "nightlife", status: "draft", featured: false, date: "", time: "", dateConfirmed: true, town: "", state: "MA", zip: "", venue: "", address: "", host: "", contactEmail: "", contactPhone: "", price: "", ticketUrl: "", art: "purple", image: "", description: "" };
   r.get("/events/new", (req, res) => page(res, "event-form", "events", { ev: blankEvent, isNew: true, interests: INTERESTS }));
   r.get("/events/:id/edit", wrap(async (req, res, next) => {
     const ev = await records.get("event", req.params.id);
@@ -203,6 +206,8 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       if (await records.get("event", id)) id += "-" + crypto.randomBytes(2).toString("hex");
     }
     const old = (await records.get("event", id)) || {};
+    const { loc, errors: locErrors } = L.fromForm({ ...b, placeName: b.venue });
+    if (locErrors.length) return fail(res, b.id ? `/admin/events/${b.id}/edit` : "/admin/events/new", locErrors.join(" "));
     const cover = await keepImages(b.image, 1);
     const ev = {
       ...old, slug: id,
@@ -210,7 +215,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
       category: INTERESTS.some(i => i.key === b.category) ? b.category : "nightlife",
       status: ["draft", "published", "cancelled"].includes(b.status) ? b.status : "draft",
       featured: b.featured === "on", date: b.date, time: (b.time || "").trim(), dateConfirmed: b.dateConfirmed === "on",
-      town: (b.town || "").trim(), state: (b.state || "").trim().slice(0, 40), venue: (b.venue || "").trim(), address: (b.address || "").trim(),
+      venue: loc.placeName, address: loc.address, town: loc.town, state: loc.state, zip: loc.zip, locVersion: 1,
       host: (b.host || "").trim(), contactEmail: (b.contactEmail || "").trim(), contactPhone: (b.contactPhone || "").trim(),
       price: (b.price || "").trim() || "See details", ticketUrl: /^https?:\/\//.test(b.ticketUrl || "") ? b.ticketUrl.trim() : "",
       art: ["purple", "gold", "magenta", "teal"].includes(b.art) ? b.art : "purple",
@@ -251,7 +256,7 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     if (q) list = list.filter(o => (o.name + " " + o.town + " " + o.description).toLowerCase().includes(q));
     page(res, "organizations", "organizations", { list, f, q: req.query.q || "", counts, cats: ORG_CATS });
   }));
-  const blankOrg = { name: "", category: "community", state: "MA", meets: "", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" };
+  const blankOrg = { name: "", category: "community", placeName: "", zip: "", state: "MA", meets: "", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" };
   r.get("/organizations/new", (req, res) => page(res, "org-form", "organizations", { org: blankOrg, isNew: true, cats: ORG_CATS }));
   r.get("/organizations/:id/edit", wrap(async (req, res, next) => {
     const org = await records.get("org", req.params.id);
@@ -265,11 +270,13 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
     let id = b.id;
     if (!id) { id = records.slugify(name); if (await records.get("org", id)) id += "-" + crypto.randomBytes(2).toString("hex"); }
     const old = (await records.get("org", id)) || {};
+    const { loc, errors: locErrors } = L.fromForm(b);
+    if (locErrors.length) return fail(res, b.id ? `/admin/organizations/${b.id}/edit` : "/admin/organizations/new", locErrors.join(" "));
     const images = await keepImages(b.images, 4);
     const org = {
       ...old, name,
       category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community",
-      town: (b.town || "").trim(), state: (b.state || "").trim().slice(0, 40), address: (b.address || "").trim(),
+      placeName: loc.placeName, address: loc.address, town: loc.town, state: loc.state, zip: loc.zip, locVersion: 1,
       phone: (b.phone || "").trim(), website: /^https?:\/\//.test(b.website || "") ? b.website.trim() : (b.website ? "https://" + b.website.trim() : ""),
       description: (b.description || "").trim(), meets: (b.meets || "").trim(), images,
       photosRepresentative: b.photosRepresentative === "on", verified: b.verified === "on",
@@ -288,6 +295,25 @@ module.exports = function adminRouter({ store, records, content, mailer, INTERES
   r.post("/organizations/:id/delete", wrap(async (req, res) => {
     await records.del("org", req.params.id);
     go(res, "/admin/organizations", "Organization deleted.");
+  }));
+
+  // Clean exports for analysis (one column per location part)
+  const csvCell = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  r.get("/organizations.csv", wrap(async (req, res) => {
+    const rows = await content.allOrgs();
+    const head = ["id", "name", "category", "place_name", "street", "city", "state", "zip", "phone", "website", "meets", "verified", "status", "photos", "updated"];
+    const csv = [head.join(",")].concat(rows.map(o => [o.id, o.name, o.category, o.placeName, o.address, o.town, o.state, o.zip, o.phone, o.website, o.meets, o.verified ? "yes" : "no", o.status || "published", (o.images || []).length, o.updatedAt].map(csvCell).join(","))).join("\n");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=kyoona-organizations.csv");
+    res.send(csv);
+  }));
+  r.get("/events.csv", wrap(async (req, res) => {
+    const rows = await content.allEvents();
+    const head = ["id", "title", "category", "status", "date", "time", "date_confirmed", "venue", "street", "city", "state", "zip", "host", "price", "ticket_url", "featured"];
+    const csv = [head.join(",")].concat(rows.map(e => [e.id, e.title, e.category, e.status, e.date, e.time, e.dateConfirmed ? "yes" : "no", e.venue, e.address, e.town, e.state, e.zip, e.host, e.price, e.ticketUrl, e.featured ? "yes" : "no"].map(csvCell).join(","))).join("\n");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=kyoona-events.csv");
+    res.send(csv);
   }));
 
   // ---------- COMMUNITY MEMBERS ----------

@@ -2,6 +2,7 @@
 // Everything lands in the admin Submissions inbox (records kind "submission").
 const express = require("express");
 const crypto = require("crypto");
+const L = require("./location");
 
 const LIMITS = { short: 120, long: 2000 };
 const clean = (v, n = LIMITS.short) => String(v || "").trim().slice(0, n);
@@ -41,10 +42,11 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
     const b = req.body;
     const f = {
       title: clean(b.title), date: clean(b.date, 10), time: clean(b.time, 40), category: INTERESTS.some(i => i.key === b.category) ? b.category : "",
-      venue: clean(b.venue), address: clean(b.address, 200), price: clean(b.price, 60), ticketUrl: urlish(b.ticketUrl), description: clean(b.description, LIMITS.long),
+      price: clean(b.price, 60), ticketUrl: urlish(b.ticketUrl), description: clean(b.description, LIMITS.long),
       host: clean(b.host), name: clean(b.name), email: clean(b.email), phone: clean(b.phone, 40), notes: clean(b.notes, 600)
     };
-    const errors = [];
+    const { loc, errors } = L.fromForm({ ...b, placeName: b.venue });
+    Object.assign(f, { venue: loc.placeName, address: loc.address, town: loc.town, state: loc.state, zip: loc.zip });
     if (b.website) return res.redirect("/submit/thanks?t=event");
     if (!f.title) errors.push("Give the event a name.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) errors.push("Pick the event date.");
@@ -63,15 +65,16 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
   r.post("/listing", wrap(async (req, res) => {
     const b = req.body;
     const f = {
-      name: clean(b.name), category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community", town: clean(b.town), state: clean(b.state, 40), address: clean(b.address, 200),
+      name: clean(b.name), category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community", 
       phone: clean(b.phone, 40), website: urlish(b.website), description: clean(b.description, LIMITS.long), meets: clean(b.meets, 300),
       contactName: clean(b.contactName), contactEmail: clean(b.contactEmail), role: clean(b.role), notes: clean(b.notes, 600)
     };
+    const { loc, errors: locErrors } = L.fromForm(b, { requireTownState: true });
+    Object.assign(f, loc);
     const errors = [];
     if (b.website2) return res.redirect("/submit/thanks?t=listing");
     if (!f.name) errors.push("Add the name of the organization.");
-    if (!f.town) errors.push("Which city or town is it in?");
-    if (!f.state) errors.push("Which state is it in?");
+    errors.push(...locErrors);
     if (!f.description) errors.push("Add a short description so newcomers know what it is.");
     if (!f.contactName) errors.push("Tell us your name.");
     if (!emailOk(f.contactEmail)) errors.push("Add an email we can reach you on.");
@@ -93,14 +96,16 @@ module.exports = function submissionsRouter({ records, content, mailer, INTEREST
     const org = orgs.find(o => o.id === b.org);
     const f = {
       org: b.org || "", changes: [].concat(b.changes || []),
-      address: clean(b.address, 200), phone: clean(b.phone, 40), website: b.website ? urlish(b.website) : "", description: clean(b.description, LIMITS.long),
+      phone: clean(b.phone, 40), website: b.website ? urlish(b.website) : "", description: clean(b.description, LIMITS.long),
       meets: clean(b.meets, 300), closed: b.closed === "yes", notes: clean(b.notes, 600),
       contactName: clean(b.contactName), contactEmail: clean(b.contactEmail), role: clean(b.role)
     };
-    const errors = [];
+    const { loc, errors: locErrors } = L.fromForm(b);
+    Object.assign(f, loc);
+    const errors = [...locErrors];
     if (b.website2) return res.redirect("/submit/thanks?t=update");
     if (!org) errors.push("Pick the listing you want to update.");
-    const anything = f.address || f.phone || f.website || f.description || f.meets || f.closed || f.notes || [].concat(b.photos || []).length;
+    const anything = f.placeName || f.address || f.town || f.state || f.zip || f.phone || f.website || f.description || f.meets || f.closed || f.notes || [].concat(b.photos || []).length;
     if (!anything) errors.push("Tell us what should change.");
     if (!f.contactName) errors.push("Tell us your name.");
     if (!emailOk(f.contactEmail)) errors.push("Add an email we can reach you on.");

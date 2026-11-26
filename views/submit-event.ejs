@@ -21,10 +21,8 @@
     </div>
     <label class="field"><span>What kind of event?</span>
       <select name="category"><option value="">Choose one</option><% interests.forEach(i => { %><option value="<%= i.key %>" <%= f.category === i.key ? 'selected' : '' %>><%= i.label %></option><% }) %></select></label>
-    <div class="field-row">
-      <label class="field"><span>Venue</span><input name="venue" value="<%= f.venue || '' %>" placeholder="Venue name"></label>
-      <label class="field"><span>Address</span><input name="address" value="<%= f.address || '' %>" placeholder="Street, town"></label>
-    </div>
+    <h3 class="fp-sec">Where</h3>
+    <%- include('partials/location-fields', { f, required: false, showPlace: true, placeKey: 'venue', placeLabel: 'Venue name', placeHint: 'Venue or hall name' }) %>
     <div class="field-row">
       <label class="field"><span>Entry / ticket price</span><input name="price" value="<%= f.price || '' %>" placeholder="$25, Free"></label>
       <label class="field"><span>Ticket link (if any)</span><input name="ticketUrl" value="<%= f.ticketUrl || '' %>" placeholder="https://"></label>

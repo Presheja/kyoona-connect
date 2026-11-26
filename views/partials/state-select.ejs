@@ -1,0 +1,9 @@
+<select name="<%= typeof fieldName !== 'undefined' ? fieldName : 'state' %>" <%= typeof required !== 'undefined' && required ? 'required' : '' %>>
+  <option value="">Choose state</option>
+  <optgroup label="United States">
+    <% STATES.filter(s => !CANADA.has(s[0])).forEach(([c, n]) => { %><option value="<%= c %>" <%= value === c ? 'selected' : '' %>><%= n %> (<%= c %>)</option><% }) %>
+  </optgroup>
+  <optgroup label="Canada">
+    <% STATES.filter(s => CANADA.has(s[0])).forEach(([c, n]) => { %><option value="<%= c %>" <%= value === c ? 'selected' : '' %>><%= n.replace(' (Canada)', '') %> (<%= c %>)</option><% }) %>
+  </optgroup>
+</select>

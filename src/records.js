@@ -4,6 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const L = require("./location");
 
 const useMysql = !!process.env.DB_HOST;
 const DATA = path.join(__dirname, "..", "data");
@@ -28,6 +29,27 @@ async function init(getPool) {
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
   }
   await seed();
+  await migrateLocations();
+}
+
+// One-time clean-up: split old one-box addresses into placeName / address / town / state / zip.
+// Each record is stamped locVersion: 1 so it is never touched twice.
+async function migrateLocations() {
+  let changed = 0;
+  for (const o of await list("org")) {
+    if (o.locVersion) continue;
+    const p = L.parseLegacy(o);
+    const next = { ...o, ...p, locVersion: 1 }; delete next.city;
+    await put("org", o.id, next); changed++;
+  }
+  for (const e of await list("event")) {
+    if (e.locVersion) continue;
+    const p = L.parseLegacy({ ...e, placeName: e.venue });
+    const next = { ...e, venue: e.venue || p.placeName, address: p.address, town: p.town, state: p.state, zip: p.zip, locVersion: 1 };
+    delete next.placeName; delete next.city;
+    await put("event", e.id, next); changed++;
+  }
+  if (changed) console.log(`Location clean-up: ${changed} records updated`);
 }
 
 async function list(kind) {

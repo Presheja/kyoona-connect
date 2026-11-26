@@ -9,7 +9,7 @@
           <dt>Name</dt><dd><%= d.title %></dd>
           <dt>Date</dt><dd><%= d.date %><%= d.time ? ' · ' + d.time : '' %></dd>
           <dt>Type</dt><dd><%= (interests.find(i => i.key === d.category) || {}).label || '—' %></dd>
-          <dt>Venue</dt><dd><%= d.venue || '—' %><%= d.address ? ', ' + d.address : '' %></dd>
+          <dt>Where</dt><dd><%= [d.venue, d.address, [d.town, [d.state, d.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ')].filter(Boolean).join(', ') || '—' %></dd>
           <dt>Price</dt><dd><%= d.price || '—' %></dd>
           <dt>Tickets</dt><dd><% if (d.ticketUrl) { %><a class="link" href="<%= d.ticketUrl %>" target="_blank" rel="noopener"><%= d.ticketUrl %></a><% } else { %>—<% } %></dd>
           <dt>Hosted by</dt><dd><%= d.host || '—' %></dd>
@@ -26,8 +26,9 @@
           <dt>Type</dt><dd><%= d.category %></dd>
           <dt>Description</dt><dd class="pre"><%= d.description %></dd>
           <dt>Meets / opens</dt><dd><%= d.meets || '—' %></dd>
-          <dt>Location</dt><dd><%= [d.town, d.state].filter(Boolean).join(", ") %></dd>
-          <dt>Address</dt><dd><%= d.address || '—' %></dd>
+          <dt>Building</dt><dd><%= d.placeName || '—' %></dd>
+          <dt>Street</dt><dd><%= d.address || '—' %></dd>
+          <dt>City / state / ZIP</dt><dd><%= [d.town, [d.state, d.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ') %></dd>
           <dt>Phone</dt><dd><%= d.phone || '—' %></dd>
           <dt>Website</dt><dd><% if (d.website) { %><a class="link" href="<%= d.website %>" target="_blank" rel="noopener"><%= d.website %></a><% } else { %>—<% } %></dd>
           <% if (d.notes) { %><dt>Notes</dt><dd class="pre"><%= d.notes %></dd><% } %>
@@ -41,7 +42,7 @@
         <table class="tbl diff">
           <thead><tr><th>Field</th><th>Now on the site</th><th>Change to</th></tr></thead>
           <tbody>
-            <% [['address','Address'],['phone','Phone'],['website','Website'],['meets','Meets / opens'],['description','Description']].forEach(([k,l]) => { if (d[k]) { %>
+            <% [['placeName','Building'],['address','Street'],['town','City / town'],['state','State'],['zip','ZIP'],['phone','Phone'],['website','Website'],['meets','Meets / opens'],['description','Description']].forEach(([k,l]) => { if (d[k]) { %>
               <tr><td><%= l %></td><td class="old"><%= (org && org[k]) || '—' %></td><td class="new"><%= d[k] %></td></tr>
             <% } }) %>
           </tbody>

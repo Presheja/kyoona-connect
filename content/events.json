@@ -7,9 +7,8 @@
     "date": "2027-06-13",
     "time": "",
     "dateConfirmed": false,
-    "city": "boston",
     "venue": "St. Mary's Parish",
-    "address": "133 School St, Waltham, MA",
+    "address": "133 School St",
     "host": "Ugandan Catholic Community in the Archdiocese of Boston",
     "category": "faith",
     "price": "Free",
@@ -17,7 +16,11 @@
     "art": "gold",
     "image": "",
     "description": "The biggest faith gathering of the Ugandan year in Boston. Mass, traditional dance, drums, and enough food afterwards that nobody leaves hungry. Usually the second Sunday of June.",
-    "featured": true
+    "featured": true,
+    "town": "Waltham",
+    "state": "MA",
+    "zip": "",
+    "locVersion": 1
   },
   {
     "slug": "unaa-convention-2027",
@@ -27,7 +30,6 @@
     "date": "2027-09-03",
     "time": "",
     "dateConfirmed": false,
-    "city": "travel",
     "venue": "City announced by UNAA",
     "address": "",
     "host": "Ugandan North American Association",
@@ -37,7 +39,11 @@
     "art": "purple",
     "image": "",
     "description": "The largest gathering of Ugandans in North America, every Labor Day weekend. Boston shows up for this one. Join the community and we'll tell you the moment the city and registration are announced.",
-    "featured": false
+    "featured": false,
+    "town": "",
+    "state": "",
+    "zip": "",
+    "locVersion": 1
   },
   {
     "slug": "kampala-nights-boston-2026",
@@ -47,9 +53,8 @@
     "date": "2026-09-11",
     "time": "9:00 PM",
     "dateConfirmed": true,
-    "city": "boston",
     "venue": "Downtown Boston",
-    "address": "Boston, MA",
+    "address": "",
     "host": "Kyoona Connect",
     "category": "nightlife",
     "price": "$35",
@@ -57,6 +62,10 @@
     "art": "magenta",
     "image": "/media/kampala-nights.jpg",
     "description": "Afrobeats, dancehall, East African hits and throwbacks. The first Kyoona Connect night out.",
-    "featured": false
+    "featured": false,
+    "town": "Boston",
+    "state": "MA",
+    "zip": "",
+    "locVersion": 1
   }
 ]

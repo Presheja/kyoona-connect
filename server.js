@@ -18,6 +18,7 @@ const content = require("./src/content");
 const store = require("./src/store");
 const mailer = require("./src/mailer");
 const icon = require("./src/icons");
+const L = require("./src/location");
 const records = require("./src/records");
 const adminRouter = require("./src/admin/routes");
 const submissionsRouter = require("./src/submissions");
@@ -60,6 +61,7 @@ app.use((req, res, next) => {
   res.locals.contact = st.supportEmail || CONTACT;
   res.locals.interests = INTERESTS;
   res.locals.icon = icon;
+  res.locals.STATES = L.STATES; res.locals.CANADA = L.CANADA; res.locals.mapUrl = L.mapUrl; res.locals.stateName = L.stateName;
   res.locals.cities = CITIES;
   res.locals.meta = { title: "Kyoona Connect", description: "Where Ugandans in the diaspora find each other. Events, community, and a reason to leave the house.", image: "/media/og-image.jpg" };
   next();

@@ -1,4 +1,4 @@
-<%- include('partials/top', { title: 'Events', subtitle: 'Everything on the public Events page and home page', actions: '<a class="ab ab-coral" href="/admin/events/new">' + icon('plus', 16) + 'Create event</a>' }) %>
+<%- include('partials/top', { title: 'Events', subtitle: 'Everything on the public Events page and home page', actions: '<a class="ab" href="/admin/events.csv">' + icon('download', 16) + 'Export CSV</a><a class="ab ab-coral" href="/admin/events/new">' + icon('plus', 16) + 'Create event</a>' }) %>
 <form class="toolbar" method="get">
   <label class="search"><%- icon('search', 16) %><input name="q" value="<%= q %>" placeholder="Search events..."><input type="hidden" name="f" value="<%= f %>"></label>
   <div class="tabs">
@@ -21,7 +21,7 @@
         <span class="cat"><%= (interests.find(i => i.key === e.category) || {}).label || e.category %></span>
         <h3><%= e.title %><%= e.subtitle ? ' – ' + e.subtitle : '' %></h3>
         <p class="muted"><%= e.dateLabel %><%= e.time ? ' · ' + e.time : '' %></p>
-        <p class="muted"><%= e.venue || 'Venue TBC' %></p>
+        <p class="muted"><%= [e.venue, e.location].filter(Boolean).join(' · ') || 'Venue TBC' %></p>
       </div>
       <div class="ev-actions">
         <a class="ab ab-indigo" href="/admin/events/<%= e.id %>/edit"><%- icon('edit', 15) %>Edit</a>

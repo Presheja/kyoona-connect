@@ -19,12 +19,7 @@
       <select name="category"><% cats.forEach(([k,l]) => { %><option value="<%= k %>" <%= f.category === k ? 'selected' : '' %>><%= l %></option><% }) %></select></label>
     <label class="field"><span>Describe it for someone who just moved here *</span><textarea name="description" rows="4" required placeholder="Who it's for, what happens there, what to expect the first time."><%= f.description || '' %></textarea></label>
     <label class="field"><span>When do you meet or open?</span><input name="meets" value="<%= f.meets || '' %>" placeholder="Sundays 11am, Luganda service"></label>
-    <div class="field-row">
-      <label class="field"><span>City / town *</span><input name="town" value="<%= f.town || '' %>" required placeholder="Waltham"></label>
-      <label class="field"><span>State *</span><input name="state" value="<%= f.state || '' %>" required list="state-list" placeholder="MA" maxlength="40"></label>
-    </div>
-    <%- include('partials/states-datalist') %>
-    <label class="field"><span>Street address</span><input name="address" value="<%= f.address || '' %>" placeholder="Street and ZIP"></label>
+    <%- include('partials/location-fields', { f, required: true, showPlace: true, placeKey: 'placeName', placeLabel: 'Meets in a building with a different name?', placeHint: 'e.g. Covenant Church' }) %>
     <div class="field-row">
       <label class="field"><span>Phone</span><input name="phone" value="<%= f.phone || '' %>"></label>
       <label class="field"><span>Website or Facebook page</span><input name="website" value="<%= f.website || '' %>" placeholder="https://"></label>

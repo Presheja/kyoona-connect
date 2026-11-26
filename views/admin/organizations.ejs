@@ -1,4 +1,4 @@
-<%- include('partials/top', { title: 'Organizations', subtitle: 'Everything on the Find your people page', actions: '<a class="ab ab-coral" href="/admin/organizations/new">' + icon('plus', 16) + 'Add organization</a>' }) %>
+<%- include('partials/top', { title: 'Organizations', subtitle: 'Everything on the Find your people page', actions: '<a class="ab" href="/admin/organizations.csv">' + icon('download', 16) + 'Export CSV</a><a class="ab ab-coral" href="/admin/organizations/new">' + icon('plus', 16) + 'Add organization</a>' }) %>
 <form class="toolbar" method="get">
   <label class="search"><%- icon('search', 16) %><input name="q" value="<%= q %>" placeholder="Search organizations..."><input type="hidden" name="f" value="<%= f %>"></label>
   <div class="tabs">
@@ -14,9 +14,9 @@
     <tbody>
     <% list.forEach(o => { %>
       <tr>
-        <td><a class="who" href="/admin/organizations/<%= o.id %>/edit"><span class="sq" <% if ((o.images||[])[0]) { %>style="background-image:url('<%= o.images[0] %>')"<% } %>></span><div><strong><%= o.name %></strong><small><%= o.address || o.town %></small></div></a></td>
+        <td><a class="who" href="/admin/organizations/<%= o.id %>/edit"><span class="sq" <% if ((o.images||[])[0]) { %>style="background-image:url('<%= o.images[0] %>')"<% } %>></span><div><strong><%= o.name %></strong><small><%= o.streetLine || '—' %></small></div></a></td>
         <td><%= (cats.find(c => c[0] === o.category) || [,''])[1] %></td>
-        <td><%= o.location %></td>
+        <td><%= o.location || '—' %><% if (!o.town || !o.state) { %> <span class="pill st-pending">incomplete</span><% } %></td>
         <td><%= (o.images || []).length %>/4<%= o.photosRepresentative ? ' · stock' : '' %></td>
         <td>
           <span class="pill <%= o.verified ? 'st-confirmed' : 'st-pending' %>"><%= o.verified ? 'Confirmed' : 'To confirm' %></span>
