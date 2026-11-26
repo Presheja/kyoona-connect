@@ -480,3 +480,8 @@ th{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--so
 .om-lbl{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
 .om-btn{display:inline-flex;align-items:center;gap:.45rem;margin-top:.15rem;background:#fff;border:1.5px solid #e3dceb;color:var(--ink)!important;padding:.45rem .9rem;border-radius:999px;font-size:.85rem!important;font-weight:700;transition:border-color .2s,color .2s}
 .om-btn:hover{border-color:var(--coral);color:var(--coral)!important}
+
+.site-notice{background:var(--ink);color:#fff;text-align:center;font-size:.85rem;font-weight:600;padding:.55rem 1rem;position:relative;z-index:60}
+.home .site-notice{position:relative}
+.site-notice{height:38px;display:flex;align-items:center;justify-content:center;padding:0 1rem}
+.site-notice + .site-header.on-dark{top:38px}

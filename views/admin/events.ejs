@@ -1,0 +1,39 @@
+<%- include('partials/top', { title: 'Events', subtitle: 'Everything on the public Events page and home page', actions: '<a class="ab ab-coral" href="/admin/events/new">' + icon('plus', 16) + 'Create event</a>' }) %>
+<form class="toolbar" method="get">
+  <label class="search"><%- icon('search', 16) %><input name="q" value="<%= q %>" placeholder="Search events..."><input type="hidden" name="f" value="<%= f %>"></label>
+  <div class="tabs">
+    <% [['upcoming','Upcoming'],['past','Past'],['draft','Drafts'],['featured','Featured'],['all','All']].forEach(([k,l]) => { %>
+      <a class="tab <%= f === k ? 'on' : '' %>" href="?f=<%= k %>"><%= l %> <i><%= counts[k] %></i></a>
+    <% }) %>
+  </div>
+</form>
+
+<div class="ev-grid">
+  <% list.forEach(e => { %>
+    <article class="ev-card">
+      <div class="ev-cover art-<%= e.art %>" <% if (e.image) { %>style="background-image:url('<%= e.image %>')"<% } %>>
+        <span class="dbadge"><b><%= e.day %></b><%= e.month %></span>
+        <span class="pill st-<%= e.status %>"><%= e.status %></span>
+        <% if (e.featured) { %><span class="feat"><%- icon('star', 13) %>Featured</span><% } %>
+        <% if (!e.image) { %><span class="ev-cover-title"><%= e.title %></span><% } %>
+      </div>
+      <div class="ev-body">
+        <span class="cat"><%= (interests.find(i => i.key === e.category) || {}).label || e.category %></span>
+        <h3><%= e.title %><%= e.subtitle ? ' – ' + e.subtitle : '' %></h3>
+        <p class="muted"><%= e.dateLabel %><%= e.time ? ' · ' + e.time : '' %></p>
+        <p class="muted"><%= e.venue || 'Venue TBC' %></p>
+      </div>
+      <div class="ev-actions">
+        <a class="ab ab-indigo" href="/admin/events/<%= e.id %>/edit"><%- icon('edit', 15) %>Edit</a>
+        <% if (e.status === 'published' && !e.past) { %><a class="ab" href="/events/<%= e.id %>" target="_blank"><%- icon('eye', 15) %>View</a><% } %>
+        <form method="post" action="/admin/events/<%= e.id %>/feature"><input type="hidden" name="f" value="<%= f %>"><button class="ab" type="submit"><%- icon('star', 15) %><%= e.featured ? 'Unfeature' : 'Feature' %></button></form>
+        <% if (e.status === 'draft') { %>
+          <form method="post" action="/admin/events/<%= e.id %>/status"><input type="hidden" name="status" value="published"><input type="hidden" name="f" value="<%= f %>"><button class="ab ab-teal" type="submit"><%- icon('check', 15) %>Publish</button></form>
+        <% } %>
+        <form method="post" action="/admin/events/<%= e.id %>/delete" data-confirm="Delete “<%= e.title %>”? This can't be undone."><button class="ab ab-danger" type="submit" aria-label="Delete"><%- icon('trash', 15) %></button></form>
+      </div>
+    </article>
+  <% }) %>
+</div>
+<% if (!list.length) { %><div class="adm-card empty"><h2>No events here.</h2><p class="muted">Create one and it shows up on the site as soon as it's published.</p><a class="ab ab-coral" href="/admin/events/new"><%- icon('plus', 16) %>Create event</a></div><% } %>
+<%- include('partials/bottom') %>

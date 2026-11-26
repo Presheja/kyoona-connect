@@ -1,0 +1,37 @@
+<%- include('partials/top', { title: 'Organizations', subtitle: 'Everything on the Find your people page', actions: '<a class="ab ab-coral" href="/admin/organizations/new">' + icon('plus', 16) + 'Add organization</a>' }) %>
+<form class="toolbar" method="get">
+  <label class="search"><%- icon('search', 16) %><input name="q" value="<%= q %>" placeholder="Search organizations..."><input type="hidden" name="f" value="<%= f %>"></label>
+  <div class="tabs">
+    <a class="tab <%= f === 'all' ? 'on' : '' %>" href="?f=all">All <i><%= counts.all %></i></a>
+    <% cats.forEach(([k,l]) => { if (counts[k]) { %><a class="tab <%= f === k ? 'on' : '' %>" href="?f=<%= k %>"><%= l %> <i><%= counts[k] %></i></a><% } }) %>
+    <a class="tab <%= f === 'unconfirmed' ? 'on' : '' %>" href="?f=unconfirmed">To confirm <i><%= counts.unconfirmed %></i></a>
+    <a class="tab <%= f === 'hidden' ? 'on' : '' %>" href="?f=hidden">Hidden <i><%= counts.hidden %></i></a>
+  </div>
+</form>
+<section class="adm-card flush">
+  <table class="tbl orgs">
+    <thead><tr><th>Organization</th><th>Type</th><th>Town</th><th>Photos</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    <% list.forEach(o => { %>
+      <tr>
+        <td><a class="who" href="/admin/organizations/<%= o.id %>/edit"><span class="sq" <% if ((o.images||[])[0]) { %>style="background-image:url('<%= o.images[0] %>')"<% } %>></span><div><strong><%= o.name %></strong><small><%= o.address || o.town %></small></div></a></td>
+        <td><%= (cats.find(c => c[0] === o.category) || [,''])[1] %></td>
+        <td><%= o.town %></td>
+        <td><%= (o.images || []).length %>/4<%= o.photosRepresentative ? ' · stock' : '' %></td>
+        <td>
+          <span class="pill <%= o.verified ? 'st-confirmed' : 'st-pending' %>"><%= o.verified ? 'Confirmed' : 'To confirm' %></span>
+          <% if (o.status === 'hidden') { %><span class="pill st-cancelled">Hidden</span><% } %>
+        </td>
+        <td class="row-actions">
+          <a class="ab ab-indigo" href="/admin/organizations/<%= o.id %>/edit"><%- icon('edit', 15) %>Edit</a>
+          <form method="post" action="/admin/organizations/<%= o.id %>/toggle"><input type="hidden" name="what" value="verified"><input type="hidden" name="f" value="<%= f %>"><button class="ab" type="submit"><%- icon('check', 15) %><%= o.verified ? 'Unconfirm' : 'Confirm' %></button></form>
+          <form method="post" action="/admin/organizations/<%= o.id %>/toggle"><input type="hidden" name="what" value="hidden"><input type="hidden" name="f" value="<%= f %>"><button class="ab" type="submit"><%- icon('eye', 15) %><%= o.status === 'hidden' ? 'Show' : 'Hide' %></button></form>
+          <form method="post" action="/admin/organizations/<%= o.id %>/delete" data-confirm="Delete <%= o.name %>? This can't be undone."><button class="ab ab-danger" type="submit" aria-label="Delete"><%- icon('trash', 15) %></button></form>
+        </td>
+      </tr>
+    <% }) %>
+    <% if (!list.length) { %><tr><td colspan="6" class="muted">Nothing here.</td></tr><% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('partials/bottom') %>

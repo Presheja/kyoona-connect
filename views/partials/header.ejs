@@ -1,3 +1,4 @@
+<% if (settings && settings.announcement) { %><div class="site-notice"><%= settings.announcement %></div><% } %>
 <header class="site-header <%= typeof headerDark !== 'undefined' && headerDark ? 'on-dark' : '' %>">
   <a class="brand" href="/" aria-label="Kyoona Connect home">
     <span class="brand-main">KYO<span class="brand-flower">✺</span>NA</span>

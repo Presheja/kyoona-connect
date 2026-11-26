@@ -23,6 +23,9 @@
       <h4>Say hello</h4>
       <a href="mailto:<%= contact %>"><%= contact %></a>
       <span>Boston, MA · USA</span>
+      <% if (settings.instagram) { %><a href="<%= settings.instagram %>" target="_blank" rel="noopener">Instagram</a><% } %>
+      <% if (settings.facebook) { %><a href="<%= settings.facebook %>" target="_blank" rel="noopener">Facebook</a><% } %>
+      <% if (settings.whatsapp) { %><a href="<%= settings.whatsapp %>" target="_blank" rel="noopener">WhatsApp</a><% } %>
       <a class="connect-script" href="mailto:<%= contact %>">Let's connect.</a>
     </div>
   </div>

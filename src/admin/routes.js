@@ -1,0 +1,287 @@
+// Admin portal routes. Each section below is one sidebar page.
+const express = require("express");
+const crypto = require("crypto");
+const PAGES = require("./pages");
+
+module.exports = function adminRouter({ store, records, content, mailer, INTERESTS, CITIES, SITE, CONTACT, SECRET, ADMIN_PASSWORD }) {
+  const r = express.Router();
+  const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+  // ---------- auth ----------
+  const sign = v => crypto.createHmac("sha256", SECRET).update(v).digest("hex");
+  function isAdmin(req) {
+    const c = (req.headers.cookie || "").split(/;\s*/).find(x => x.startsWith("kc_admin="));
+    if (!c) return false;
+    const [exp, sig] = decodeURIComponent(c.slice(9)).split(".");
+    const good = sign("admin" + exp);
+    return !!sig && sig.length === good.length && Number(exp) > Date.now() && crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(good));
+  }
+
+  r.use((req, res, next) => {
+    res.locals.meta = { title: "Admin — Kyoona Connect", description: "", image: "" };
+    res.locals.pages = PAGES;
+    res.locals.flash = req.query.ok || "";
+    res.locals.flashError = req.query.err || "";
+    res.locals.mailOn = mailer.configured;
+    res.locals.dbOn = store.useMysql;
+    next();
+  });
+
+  r.get("/login", (req, res) => res.render("admin/login", { error: ADMIN_PASSWORD ? "" : "Add ADMIN_PASSWORD to your settings to switch the admin on." }));
+  r.post("/login", (req, res) => {
+    const pw = String(req.body.password || "");
+    const ok = ADMIN_PASSWORD && pw.length === ADMIN_PASSWORD.length && crypto.timingSafeEqual(Buffer.from(pw), Buffer.from(ADMIN_PASSWORD));
+    if (!ok) return res.status(401).render("admin/login", { error: "That's not it." });
+    const exp = String(Date.now() + 12 * 3600 * 1000);
+    res.setHeader("Set-Cookie", `kc_admin=${encodeURIComponent(exp + "." + sign("admin" + exp))}; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200${SITE.startsWith("https") ? "; Secure" : ""}`);
+    res.redirect("/admin");
+  });
+  r.post("/logout", (req, res) => { res.setHeader("Set-Cookie", "kc_admin=; Path=/; Max-Age=0"); res.redirect("/admin/login"); });
+  r.use((req, res, next) => isAdmin(req) ? next() : res.redirect("/admin/login"));
+
+  const page = (res, view, key, data) => res.render("admin/" + view, { active: key, ...data });
+  const go = (res, url, msg) => res.redirect(url + (url.includes("?") ? "&" : "?") + "ok=" + encodeURIComponent(msg));
+  const fail = (res, url, msg) => res.redirect(url + (url.includes("?") ? "&" : "?") + "err=" + encodeURIComponent(msg));
+  const toArr = v => v == null ? [] : [].concat(v);
+  async function keepImages(values, max) {
+    const out = [];
+    for (const v of toArr(values).slice(0, max)) {
+      if (!v) continue;
+      if (v.startsWith("data:")) { const url = await records.saveMedia(v); if (url) out.push(url); }
+      else if (/^(\/|https:\/\/)/.test(v)) out.push(v);
+    }
+    return out;
+  }
+  const weekAgo = () => Date.now() - 7 * 86400000;
+  const ts = v => new Date(String(v).replace(" ", "T") + (String(v).includes("Z") || String(v).includes("+") ? "" : "Z")).getTime();
+
+  // ---------- DASHBOARD ----------
+  r.get("/", wrap(async (req, res) => {
+    const members = await store.list();
+    const events = await content.allEvents();
+    const orgs = await content.allOrgs();
+    const sent = await records.list("announcement");
+    const confirmed = members.filter(m => m.status === "confirmed");
+    // signups per week, last 8 weeks
+    const weeks = [];
+    for (let i = 7; i >= 0; i--) {
+      const end = Date.now() - i * 7 * 86400000, start = end - 7 * 86400000;
+      const d = new Date(start);
+      weeks.push({ label: `${d.getMonth() + 1}/${d.getDate()}`, n: members.filter(m => { const t = ts(m.created_at); return t >= start && t < end; }).length });
+    }
+    page(res, "dashboard", "dashboard", {
+      stats: [
+        { label: "Confirmed members", value: confirmed.length, tone: "teal", href: "/admin/members?f=confirmed" },
+        { label: "New this week", value: members.filter(m => ts(m.created_at) >= weekAgo()).length, tone: "coral", href: "/admin/members" },
+        { label: "Waiting to confirm", value: members.filter(m => m.status === "pending").length, tone: "yellow", href: "/admin/members?f=pending" },
+        { label: "Upcoming events", value: events.filter(e => !e.past && e.status === "published").length, tone: "indigo", href: "/admin/events" },
+        { label: "Event drafts", value: events.filter(e => e.status === "draft").length, tone: "light", href: "/admin/events?f=draft" },
+        { label: "Organizations listed", value: orgs.filter(o => o.status !== "hidden").length, tone: "light", href: "/admin/organizations" },
+        { label: "Listings to confirm", value: orgs.filter(o => !o.verified).length, tone: "light", href: "/admin/organizations?f=unconfirmed" },
+        { label: "Emails sent", value: sent.reduce((a, s) => a + (s.test ? 0 : s.sent || 0), 0), tone: "light", href: "/admin/announcements" }
+      ],
+      weeks,
+      maxWeek: Math.max(1, ...weeks.map(w => w.n)),
+      recent: members.slice(0, 6),
+      nextEvents: events.filter(e => !e.past && e.status !== "cancelled").slice(0, 4),
+      todo: [
+        ...events.filter(e => !e.past && !e.dateConfirmed && e.status === "published").map(e => ({ text: `"${e.title}" still has no confirmed date`, href: `/admin/events/${e.id}/edit` })),
+        ...orgs.filter(o => !o.verified).slice(0, 4).map(o => ({ text: `Confirm details for ${o.name}`, href: `/admin/organizations/${o.id}/edit` })),
+        ...(!mailer.configured ? [{ text: "Connect email (SMTP) so sign-ups get their confirmation", href: "/admin/settings" }] : []),
+        ...(!store.useMysql ? [{ text: "Connect the MySQL database so data survives redeploys", href: "/admin/settings" }] : [])
+      ]
+    });
+  }));
+
+  // ---------- EVENTS ----------
+  r.get("/events", wrap(async (req, res) => {
+    const f = req.query.f || "upcoming", q = (req.query.q || "").toLowerCase();
+    let list = await content.allEvents();
+    const counts = {
+      upcoming: list.filter(e => !e.past && e.status !== "draft").length,
+      past: list.filter(e => e.past).length,
+      draft: list.filter(e => e.status === "draft").length,
+      featured: list.filter(e => e.featured).length,
+      all: list.length
+    };
+    list = list.filter(e => f === "all" ? true : f === "past" ? e.past : f === "draft" ? e.status === "draft" : f === "featured" ? e.featured : !e.past && e.status !== "draft");
+    if (q) list = list.filter(e => (e.title + " " + e.venue + " " + e.host).toLowerCase().includes(q));
+    page(res, "events", "events", { list, f, q: req.query.q || "", counts, interests: INTERESTS });
+  }));
+  const blankEvent = { title: "", subtitle: "", kicker: "", category: "nightlife", status: "draft", featured: false, date: "", time: "", dateConfirmed: true, city: "boston", venue: "", address: "", host: "", contactEmail: "", contactPhone: "", price: "", ticketUrl: "", art: "purple", image: "", description: "" };
+  r.get("/events/new", (req, res) => page(res, "event-form", "events", { ev: blankEvent, isNew: true, interests: INTERESTS }));
+  r.get("/events/:id/edit", wrap(async (req, res, next) => {
+    const ev = await records.get("event", req.params.id);
+    if (!ev) return next();
+    page(res, "event-form", "events", { ev: { ...blankEvent, ...ev }, isNew: false, interests: INTERESTS });
+  }));
+  r.post("/events/save", wrap(async (req, res) => {
+    const b = req.body;
+    const title = String(b.title || "").trim();
+    if (!title || !b.date) return fail(res, b.id ? `/admin/events/${b.id}/edit` : "/admin/events/new", "An event needs a title and a date.");
+    let id = b.id;
+    if (!id) {
+      id = records.slugify(`${title}-${String(b.date).slice(0, 4)}`) || crypto.randomBytes(4).toString("hex");
+      if (await records.get("event", id)) id += "-" + crypto.randomBytes(2).toString("hex");
+    }
+    const old = (await records.get("event", id)) || {};
+    const cover = await keepImages(b.image, 1);
+    const ev = {
+      ...old, slug: id,
+      title, subtitle: (b.subtitle || "").trim(), kicker: (b.kicker || "").trim(),
+      category: INTERESTS.some(i => i.key === b.category) ? b.category : "nightlife",
+      status: ["draft", "published", "cancelled"].includes(b.status) ? b.status : "draft",
+      featured: b.featured === "on", date: b.date, time: (b.time || "").trim(), dateConfirmed: b.dateConfirmed === "on",
+      city: b.city || "boston", venue: (b.venue || "").trim(), address: (b.address || "").trim(),
+      host: (b.host || "").trim(), contactEmail: (b.contactEmail || "").trim(), contactPhone: (b.contactPhone || "").trim(),
+      price: (b.price || "").trim() || "See details", ticketUrl: /^https?:\/\//.test(b.ticketUrl || "") ? b.ticketUrl.trim() : "",
+      art: ["purple", "gold", "magenta", "teal"].includes(b.art) ? b.art : "purple",
+      image: cover[0] || "", description: (b.description || "").trim()
+    };
+    if (ev.featured) for (const other of await records.list("event")) if (other.id !== id && other.featured) await records.put("event", other.id, { ...other, featured: false });
+    await records.put("event", id, ev);
+    go(res, "/admin/events" + (ev.status === "draft" ? "?f=draft" : ""), `Saved "${title}".`);
+  }));
+  r.post("/events/:id/feature", wrap(async (req, res) => {
+    const ev = await records.get("event", req.params.id);
+    if (ev) {
+      const on = !ev.featured;
+      if (on) for (const other of await records.list("event")) if (other.featured) await records.put("event", other.id, { ...other, featured: false });
+      await records.put("event", ev.id, { ...ev, featured: on });
+    }
+    go(res, "/admin/events?f=" + (req.body.f || "upcoming"), ev && !ev.featured ? "Featured on the home page." : "Removed from the home page.");
+  }));
+  r.post("/events/:id/status", wrap(async (req, res) => {
+    const ev = await records.get("event", req.params.id);
+    if (ev && ["draft", "published", "cancelled"].includes(req.body.status)) await records.put("event", ev.id, { ...ev, status: req.body.status });
+    go(res, "/admin/events?f=" + (req.body.f || "upcoming"), "Status updated.");
+  }));
+  r.post("/events/:id/delete", wrap(async (req, res) => {
+    await records.del("event", req.params.id);
+    go(res, "/admin/events", "Event deleted.");
+  }));
+
+  // ---------- ORGANIZATIONS ----------
+  const ORG_CATS = [["community", "Association"], ["faith", "Church & fellowship"], ["food", "Food & business"], ["groups", "Group"]];
+  r.get("/organizations", wrap(async (req, res) => {
+    const f = req.query.f || "all", q = (req.query.q || "").toLowerCase();
+    const all = await content.allOrgs();
+    const counts = { all: all.length, unconfirmed: all.filter(o => !o.verified).length, hidden: all.filter(o => o.status === "hidden").length };
+    ORG_CATS.forEach(([k]) => counts[k] = all.filter(o => o.category === k).length);
+    let list = all.filter(o => f === "all" ? true : f === "unconfirmed" ? !o.verified : f === "hidden" ? o.status === "hidden" : o.category === f);
+    if (q) list = list.filter(o => (o.name + " " + o.town + " " + o.description).toLowerCase().includes(q));
+    page(res, "organizations", "organizations", { list, f, q: req.query.q || "", counts, cats: ORG_CATS });
+  }));
+  const blankOrg = { name: "", category: "community", city: "boston", town: "", address: "", phone: "", website: "", description: "", images: [], photosRepresentative: false, verified: false, status: "published" };
+  r.get("/organizations/new", (req, res) => page(res, "org-form", "organizations", { org: blankOrg, isNew: true, cats: ORG_CATS }));
+  r.get("/organizations/:id/edit", wrap(async (req, res, next) => {
+    const org = await records.get("org", req.params.id);
+    if (!org) return next();
+    page(res, "org-form", "organizations", { org: { ...blankOrg, ...org }, isNew: false, cats: ORG_CATS });
+  }));
+  r.post("/organizations/save", wrap(async (req, res) => {
+    const b = req.body;
+    const name = String(b.name || "").trim();
+    if (!name) return fail(res, b.id ? `/admin/organizations/${b.id}/edit` : "/admin/organizations/new", "An organization needs a name.");
+    let id = b.id;
+    if (!id) { id = records.slugify(name); if (await records.get("org", id)) id += "-" + crypto.randomBytes(2).toString("hex"); }
+    const old = (await records.get("org", id)) || {};
+    const images = await keepImages(b.images, 4);
+    const org = {
+      ...old, name,
+      category: ORG_CATS.some(([k]) => k === b.category) ? b.category : "community",
+      city: b.city || "boston", town: (b.town || "").trim(), address: (b.address || "").trim(),
+      phone: (b.phone || "").trim(), website: /^https?:\/\//.test(b.website || "") ? b.website.trim() : (b.website ? "https://" + b.website.trim() : ""),
+      description: (b.description || "").trim(), images,
+      photosRepresentative: b.photosRepresentative === "on", verified: b.verified === "on",
+      status: b.status === "hidden" ? "hidden" : "published", order: old.order ?? 999
+    };
+    await records.put("org", id, org);
+    go(res, "/admin/organizations", `Saved ${name}.`);
+  }));
+  r.post("/organizations/:id/toggle", wrap(async (req, res) => {
+    const o = await records.get("org", req.params.id);
+    if (o && req.body.what === "verified") await records.put("org", o.id, { ...o, verified: !o.verified });
+    if (o && req.body.what === "hidden") await records.put("org", o.id, { ...o, status: o.status === "hidden" ? "published" : "hidden" });
+    go(res, "/admin/organizations?f=" + (req.body.f || "all"), "Updated.");
+  }));
+  r.post("/organizations/:id/delete", wrap(async (req, res) => {
+    await records.del("org", req.params.id);
+    go(res, "/admin/organizations", "Organization deleted.");
+  }));
+
+  // ---------- COMMUNITY MEMBERS ----------
+  r.get("/members", wrap(async (req, res) => {
+    const f = req.query.f || "all", q = (req.query.q || "").toLowerCase();
+    const all = await store.list();
+    const counts = { all: all.length, confirmed: 0, pending: 0, unsubscribed: 0 };
+    all.forEach(m => counts[m.status]++);
+    let list = f === "all" ? all : all.filter(m => m.status === f);
+    if (q) list = list.filter(m => (m.email + " " + m.first_name + " " + m.city).toLowerCase().includes(q));
+    page(res, "members", "members", { list, f, q: req.query.q || "", counts, interests: INTERESTS });
+  }));
+  r.post("/members/action", wrap(async (req, res) => {
+    const { email, action } = req.body;
+    const m = await store.byEmail(String(email || ""));
+    if (!m) return fail(res, "/admin/members", "Member not found.");
+    if (action === "resend") { await mailer.sendConfirm(m); return go(res, "/admin/members", `Confirmation re-sent to ${m.email}.`); }
+    if (action === "confirm") { await store.setStatusByEmail(m.email, "confirmed"); return go(res, "/admin/members", `${m.email} marked confirmed.`); }
+    if (action === "unsubscribe") { await store.setStatusByEmail(m.email, "unsubscribed"); return go(res, "/admin/members", `${m.email} unsubscribed.`); }
+    if (action === "delete") { await store.remove(m.email); return go(res, "/admin/members", `${m.email} deleted.`); }
+    res.redirect("/admin/members");
+  }));
+  r.get("/members.csv", wrap(async (req, res) => {
+    const rows = await store.list();
+    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = ["email,first_name,city,interests,status,joined,confirmed"]
+      .concat(rows.map(m => [m.email, m.first_name, m.city, m.interests, m.status, m.created_at, m.confirmed_at].map(q).join(","))).join("\n");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=kyoona-members.csv");
+    res.send(csv);
+  }));
+
+  // ---------- ANNOUNCEMENTS ----------
+  r.get("/announcements", wrap(async (req, res) => {
+    const history = (await records.list("announcement")).sort((a, b) => b.at.localeCompare(a.at));
+    const members = (await store.list()).filter(m => m.status === "confirmed");
+    page(res, "announcements", "announcements", { events: await content.upcoming(), history, confirmedCount: members.length, interests: INTERESTS, preselect: req.query.event || "" });
+  }));
+  r.post("/announcements/send", wrap(async (req, res) => {
+    const ev = await content.event(String(req.body.slug || ""));
+    if (!ev) return fail(res, "/admin/announcements", "Pick a published event.");
+    const audience = req.body.audience || "all";
+    const test = req.body.test === "yes";
+    let members = (await store.list()).filter(m => m.status === "confirmed");
+    if (audience === "interest") members = members.filter(m => (m.interests || "").split(",").includes(ev.category));
+    if (audience === "boston") members = members.filter(m => m.city === "Greater Boston");
+    if (test) members = [{ email: CONTACT, first_name: "Test", token: "0".repeat(48) }];
+    let sent = 0;
+    for (const m of members) {
+      try { await mailer.sendEventAnnouncement(m, ev, `${SITE}/events/${ev.slug}`); sent++; }
+      catch (e) { console.error("announce to", m.email, e.message); }
+      if (!test) await new Promise(r2 => setTimeout(r2, 400));
+    }
+    const at = new Date().toISOString();
+    await records.put("announcement", at.replace(/[^0-9]/g, ""), { at, event: ev.slug, title: ev.title, audience, test, sent });
+    go(res, "/admin/announcements", test ? `Test sent to ${CONTACT}.` : `Sent to ${sent} member${sent === 1 ? "" : "s"}.`);
+  }));
+
+  // ---------- SETTINGS ----------
+  r.get("/settings", wrap(async (req, res) => {
+    const s = (await records.get("setting", "site")) || {};
+    page(res, "settings", "settings", { s, CONTACT, SITE });
+  }));
+  r.post("/settings", wrap(async (req, res) => {
+    const b = req.body;
+    const s = {
+      supportEmail: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b.supportEmail || "") ? b.supportEmail.trim() : "",
+      instagram: (b.instagram || "").trim(), facebook: (b.facebook || "").trim(), whatsapp: (b.whatsapp || "").trim(),
+      announcement: (b.announcement || "").trim().slice(0, 160)
+    };
+    await records.put("setting", "site", s);
+    req.app.locals.settings = s;
+    go(res, "/admin/settings", "Settings saved.");
+  }));
+
+  return r;
+};

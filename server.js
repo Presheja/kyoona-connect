@@ -18,6 +18,8 @@ const content = require("./src/content");
 const store = require("./src/store");
 const mailer = require("./src/mailer");
 const icon = require("./src/icons");
+const records = require("./src/records");
+const adminRouter = require("./src/admin/routes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +42,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
+app.use("/admin", express.urlencoded({ extended: true, limit: "25mb" }));
 app.use(express.urlencoded({ extended: false, limit: "20kb" }));
 app.use(express.json({ limit: "20kb" }));
 app.use(express.static(path.join(__dirname, "public"), { maxAge: "7d" }));
@@ -49,7 +52,9 @@ app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.locals.site = SITE;
   res.locals.path = req.path;
-  res.locals.contact = CONTACT;
+  const st = req.app.locals.settings || {};
+  res.locals.settings = st;
+  res.locals.contact = st.supportEmail || CONTACT;
   res.locals.interests = INTERESTS;
   res.locals.icon = icon;
   res.locals.cities = CITIES;
@@ -58,42 +63,52 @@ app.use((req, res, next) => {
 });
 
 // ---------- pages ----------
-app.get("/", (req, res) => {
-  const up = content.upcoming();
-  const next = up.find(e => e.featured) || up[0] || null;
-  const past = content.events().filter(e => e.past).slice(0, 1);
-  res.render("home", { next, upcoming: up.slice(0, 6), past, boston: content.city("boston") });
-});
+const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-app.get("/events", (req, res) => {
-  const all = content.events();
+app.get("/m/:file", wrap(async (req, res, next) => {
+  const m = await records.readMedia(req.params.file);
+  if (!m) return next();
+  res.setHeader("Content-Type", m.mime);
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  res.send(m.data);
+}));
+
+app.get("/", wrap(async (req, res) => {
+  const up = await content.upcoming();
+  const next = up.find(e => e.featured) || up[0] || null;
+  const past = (await content.events()).filter(e => e.past).slice(0, 1);
+  res.render("home", { next, upcoming: up.slice(0, 6), past, boston: await content.city("boston") });
+}));
+
+app.get("/events", wrap(async (req, res) => {
+  const all = await content.events();
   res.render("events", {
     upcoming: all.filter(e => !e.past),
     past: all.filter(e => e.past),
     meta: { ...res.locals.meta, title: "Events — Kyoona Connect", description: "Ugandan diaspora events: nights out, church gatherings, family days and conventions." }
   });
-});
+}));
 
-app.get("/events/:slug", (req, res, next) => {
-  const ev = content.event(req.params.slug);
+app.get("/events/:slug", wrap(async (req, res, next) => {
+  const ev = await content.event(req.params.slug);
   if (!ev) return next();
   res.render("event", {
     ev,
-    more: content.upcoming().filter(e => e.slug !== ev.slug).slice(0, 3),
+    more: (await content.upcoming()).filter(e => e.slug !== ev.slug).slice(0, 3),
     meta: { title: `${ev.title} — Kyoona Connect`, description: ev.description, image: ev.image || "/media/og-image.jpg" }
   });
-});
+}));
 
 app.get("/boston", (req, res) => res.redirect(301, "/cities/boston"));
-app.get("/cities/:slug", (req, res, next) => {
-  const city = content.city(req.params.slug);
+app.get("/cities/:slug", wrap(async (req, res, next) => {
+  const city = await content.city(req.params.slug);
   if (!city) return next();
   res.render("city", {
     city,
-    events: content.upcoming().filter(e => e.city === req.params.slug),
+    events: (await content.upcoming()).filter(e => e.city === req.params.slug),
     meta: { title: `Ugandans in ${city.name} — Kyoona Connect`, description: `Ugandan associations, churches, food and events in ${city.name}.`, image: "/media/og-image.jpg" }
   });
-});
+}));
 
 app.get("/about", (req, res) => res.render("about", { meta: { ...res.locals.meta, title: "About — Kyoona Connect" } }));
 app.get("/privacy", (req, res) => res.render("privacy", { meta: { ...res.locals.meta, title: "Privacy — Kyoona Connect" } }));
@@ -156,68 +171,15 @@ app.post("/unsubscribe/:token", async (req, res) => {
   res.render("message", { kind: m ? "unsubscribed" : "bad-link", meta: res.locals.meta });
 });
 
-// ---------- admin ----------
-function sign(v) { return crypto.createHmac("sha256", SECRET).update(v).digest("hex"); }
-function isAdmin(req) {
-  const c = (req.headers.cookie || "").split(/;\s*/).find(x => x.startsWith("kc_admin="));
-  if (!c) return false;
-  const [exp, sig] = decodeURIComponent(c.slice(9)).split(".");
-  const good = sign("admin" + exp);
-  return !!sig && sig.length === good.length && Number(exp) > Date.now() && crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(good));
-}
-function requireAdmin(req, res, next) { return isAdmin(req) ? next() : res.redirect("/admin/login"); }
-const adminMeta = { title: "Admin — Kyoona Connect", description: "", image: "" };
-
-app.get("/admin/login", (req, res) => res.render("admin/login", { error: ADMIN_PASSWORD ? "" : "Set ADMIN_PASSWORD in your settings to turn on the admin.", meta: adminMeta }));
-app.post("/admin/login", (req, res) => {
-  const pw = String(req.body.password || "");
-  const ok = ADMIN_PASSWORD && pw.length === ADMIN_PASSWORD.length && crypto.timingSafeEqual(Buffer.from(pw), Buffer.from(ADMIN_PASSWORD));
-  if (!ok) return res.status(401).render("admin/login", { error: "That's not it.", meta: adminMeta });
-  const exp = String(Date.now() + 12 * 3600 * 1000);
-  res.setHeader("Set-Cookie", `kc_admin=${encodeURIComponent(exp + "." + sign("admin" + exp))}; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200${SITE.startsWith("https") ? "; Secure" : ""}`);
-  res.redirect("/admin");
-});
-app.post("/admin/logout", (req, res) => { res.setHeader("Set-Cookie", "kc_admin=; Path=/; Max-Age=0"); res.redirect("/"); });
-
-app.get("/admin", requireAdmin, async (req, res) => {
-  const members = await store.list();
-  const counts = { confirmed: 0, pending: 0, unsubscribed: 0 };
-  members.forEach(m => counts[m.status]++);
-  res.render("admin/index", { members, counts, events: content.upcoming(), sent: req.query.sent, mailOn: mailer.configured, meta: adminMeta });
-});
-
-app.get("/admin/members.csv", requireAdmin, async (req, res) => {
-  const rows = await store.list();
-  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const csv = ["email,first_name,city,interests,status,joined,confirmed"]
-    .concat(rows.map(m => [m.email, m.first_name, m.city, m.interests, m.status, m.created_at, m.confirmed_at].map(q).join(",")))
-    .join("\n");
-  res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", "attachment; filename=kyoona-members.csv");
-  res.send(csv);
-});
-
-app.post("/admin/announce", requireAdmin, async (req, res) => {
-  const ev = content.event(String(req.body.slug || ""));
-  if (!ev) return res.redirect("/admin");
-  const audience = req.body.audience || "all";
-  let members = (await store.list()).filter(m => m.status === "confirmed");
-  if (audience === "interest") members = members.filter(m => (m.interests || "").split(",").includes(ev.category));
-  if (audience === "boston") members = members.filter(m => m.city === "Greater Boston");
-  if (req.body.test === "yes") members = [{ email: CONTACT, first_name: "Test", token: "0".repeat(48) }];
-  let sent = 0;
-  for (const m of members) {
-    try { await mailer.sendEventAnnouncement(m, ev, `${SITE}/events/${ev.slug}`); sent++; }
-    catch (e) { console.error("announce to", m.email, e.message); }
-    await new Promise(r => setTimeout(r, 400)); // stay friendly with Hostinger's sending limits
-  }
-  res.redirect(`/admin?sent=${sent}`);
-});
+// ---------- admin portal (see src/admin) ----------
+app.use("/admin", adminRouter({ store, records, content, mailer, INTERESTS, CITIES, SITE, CONTACT, SECRET, ADMIN_PASSWORD }));
 
 // ---------- 404 & errors ----------
 app.use((req, res) => res.status(404).render("message", { kind: "404", meta: { ...res.locals.meta, title: "Not found — Kyoona Connect" } }));
 app.use((err, req, res, next) => { console.error(err); res.status(500).render("message", { kind: "500", meta: res.locals.meta }); });
 
 store.init()
+  .then(() => records.init(store.getPool))
+  .then(async () => { app.locals.settings = (await records.get("setting", "site")) || {}; })
   .then(() => app.listen(PORT, () => console.log(`Kyoona Connect running on ${SITE} (storage: ${store.useMysql ? "MySQL" : "local file"}, email: ${mailer.configured ? "SMTP" : "console"})`)))
   .catch(e => { console.error("Could not start:", e); process.exit(1); });

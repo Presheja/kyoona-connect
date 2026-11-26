@@ -97,6 +97,19 @@ async function setStatusByToken(token, status) {
   return m;
 }
 
+async function setStatusByEmail(email, status) {
+  if (useMysql) { await pool.query("UPDATE members SET status=? WHERE email=?", [status, email]); return; }
+  const rows = readFile(); const m = rows.find(r => r.email === email); if (m) { m.status = status; writeFile(rows); }
+}
+async function remove(email) {
+  if (useMysql) { await pool.query("DELETE FROM members WHERE email=?", [email]); return; }
+  writeFile(readFile().filter(r => r.email !== email));
+}
+async function byEmail(email) {
+  if (useMysql) { const [r] = await pool.query("SELECT * FROM members WHERE email=?", [email]); return r[0] || null; }
+  return readFile().find(r => r.email === email) || null;
+}
+
 async function list() {
   if (useMysql) {
     const [rows] = await pool.query("SELECT id,email,first_name,city,interests,status,token,created_at,confirmed_at FROM members ORDER BY created_at DESC");
@@ -105,4 +118,4 @@ async function list() {
   return readFile().slice().reverse();
 }
 
-module.exports = { init, upsert, setStatusByToken, list, useMysql };
+module.exports = { init, upsert, setStatusByToken, setStatusByEmail, remove, byEmail, list, useMysql, getPool: () => pool };

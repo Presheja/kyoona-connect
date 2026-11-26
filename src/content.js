@@ -1,23 +1,17 @@
-// Loads events and city directories from /content. Edit the JSON files to
-// change what the site shows; no database needed for content.
+// Public-facing content, read from the records the admin portal manages.
 const fs = require("fs");
 const path = require("path");
-const DIR = path.join(__dirname, "..", "content");
+const records = require("./records");
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-function readJson(p, fallback) {
-  try { return JSON.parse(fs.readFileSync(p, "utf8")); } catch (e) { console.error("content:", p, e.message); return fallback; }
-}
-
 function decorate(ev) {
-  const d = new Date(ev.date + "T12:00:00");
+  const d = new Date((ev.date || "2099-01-01") + "T12:00:00");
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const past = d < today;
   return {
     ...ev,
-    past,
+    past: d < today,
     month: MONTHS[d.getMonth()],
     day: ev.dateConfirmed ? String(d.getDate()) : "TBC",
     year: d.getFullYear(),
@@ -28,18 +22,23 @@ function decorate(ev) {
     daysAway: Math.round((d - today) / 86400000)
   };
 }
+const sortEvents = list => list.sort((a, b) => (a.past - b.past) || (a.past ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
 
-// Re-read on every request so editing the JSON shows up without a restart.
-function events() {
-  return readJson(path.join(DIR, "events.json"), []).map(decorate)
-    .sort((a, b) => (a.past - b.past) || (a.past ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
-}
-function upcoming() { return events().filter(e => !e.past); }
-function event(slug) { return events().find(e => e.slug === slug); }
-function city(slug) {
+// All events, including drafts (admin).
+async function allEvents() { return sortEvents((await records.list("event")).map(decorate)); }
+// Public: published only.
+async function events() { return (await allEvents()).filter(e => e.status === "published"); }
+async function upcoming() { return (await events()).filter(e => !e.past); }
+async function event(slug) { const e = await records.get("event", slug); return e && e.status === "published" ? decorate(e) : null; }
+
+async function allOrgs() { return (await records.list("org")).sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || a.name.localeCompare(b.name)); }
+async function city(slug) {
   if (!/^[a-z-]+$/.test(slug)) return null;
-  const p = path.join(DIR, "cities", slug + ".json");
-  return fs.existsSync(p) ? readJson(p, null) : null;
+  const p = path.join(__dirname, "..", "content", "cities", slug + ".json");
+  if (!fs.existsSync(p)) return null;
+  const meta = JSON.parse(fs.readFileSync(p, "utf8"));
+  const listings = (await allOrgs()).filter(o => o.city === slug && o.status !== "hidden");
+  return { ...meta, listings };
 }
 
-module.exports = { events, upcoming, event, city };
+module.exports = { decorate, allEvents, events, upcoming, event, allOrgs, city };

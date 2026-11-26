@@ -9,8 +9,10 @@ No PHP. No Replit bill. Runs as a Node.js app on Hostinger.
 | Status | Path | What it is |
 |---|---|---|
 | NEW | `server.js` | The app: pages, sign-up, confirm/unsubscribe, admin |
-| NEW | `content/events.json` | **Events, the file you'll edit most.** Add an event = add a block |
-| NEW | `content/cities/boston.json` | Greater Boston directory listings |
+| NEW | `content/events.json` | Starter events, imported on first run. After that, use /admin |
+| NEW | `content/cities/boston.json` | Greater Boston page text plus starter listings, imported on first run |
+| NEW | `src/admin/` | The admin portal: `pages.js` (sidebar) and `routes.js` (pages) |
+| NEW | `src/records.js` | Stores events, organizations, photos, announcements and settings |
 | NEW | `src/store.js` | Saves community members (MySQL on Hostinger, a local file on your laptop) |
 | NEW | `src/mailer.js` | Confirmation and event emails (Hostinger SMTP) |
 | NEW | `src/content.js` | Reads the content files |
@@ -38,13 +40,24 @@ Open http://localhost:3000. With no settings, members are saved to `data/members
 5. In the Node.js app's **Environment variables**, add everything from `.env.example`, using the database and email details from steps 3 and 4. The `members` table creates itself the first time the app starts.
 6. Deploy, open `/admin`, log in, and send yourself a test event email.
 
-## Everyday jobs
+## The admin portal (/admin)
 
-- **Add an event:** copy a block in `content/events.json`, change it, commit. `art` can be `purple`, `gold`, `magenta` or `teal`, or set `image` to a poster in `public/media/`. Set `featured: true` to put it in the hero.
-- **Tell the community:** `/admin` → pick the event → send to all members, only members interested in that event's category, or only Greater Boston members. "Send a test to me only" is ticked by default.
-- **Export members:** `/admin` → Download CSV.
-- **Add a listing:** edit `content/cities/boston.json`, and set `"verified": true` once you've confirmed it.
-- **Photos for a listing:** each listing has an `images` list (up to 4). Use a web link, or put a photo in `public/media/orgs/` and write `/media/orgs/your-photo.jpg`. When the photos are the organization's own, set `"photosRepresentative": false` so the "Representative photos" note disappears.
+Log in with `ADMIN_PASSWORD`. The sidebar follows the original Kyoona Connect admin plan:
+
+| Page | What you do there |
+|---|---|
+| Dashboard | Member counts, sign-ups per week, what needs attention, next events |
+| Events | Create, edit, publish/draft, feature on the home page, delete. Upload a cover image |
+| Organizations | Add and edit Find your people listings with up to 4 photos, mark confirmed, hide |
+| Community members | Search and filter, resend confirmation, confirm, unsubscribe, delete, CSV export |
+| Announcements | Email an event to all members, by interest, or Greater Boston only, with a test first. Keeps a history |
+| Settings | Contact email, a notice bar across the site, social links, connection status |
+
+Tickets & orders, Member accounts, Communities and Reports & safety are shown greyed out as "Later".
+
+**Adding a page for a new stage:** add one line to `src/admin/pages.js`, add its routes to `src/admin/routes.js` (each existing page is a self-contained section to copy), and create `views/admin/<page>.ejs` from `views/admin/_template.ejs`.
+
+**Where content lives:** events, organizations, photos, announcements and settings are stored in the MySQL database (tables `records` and `media`, created automatically). Uploaded photos are resized in the browser and stored in the database too, so redeploying never wipes them. `content/events.json` and `content/cities/boston.json` are only the starter content imported on the very first run. After that, edit everything in the admin.
 
 ## How sign-up works
 

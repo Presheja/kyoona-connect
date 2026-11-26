@@ -1,0 +1,48 @@
+<%- include('partials/top', { title: isNew ? 'Add organization' : 'Edit organization', subtitle: isNew ? 'Associations, churches, restaurants and groups people can find' : org.name, actions: '<a class="ab" href="/admin/organizations">Back to organizations</a>' }) %>
+<form class="form-layout" method="post" action="/admin/organizations/save" data-dirty>
+  <input type="hidden" name="id" value="<%= isNew ? '' : org.id %>">
+  <div class="form-main">
+    <section class="adm-card fsec">
+      <h2>Profile</h2>
+      <div class="row2">
+        <label class="fld"><span>Name *</span><input name="name" value="<%= org.name %>" required></label>
+        <label class="fld"><span>Type</span><select name="category"><% cats.forEach(([k,l]) => { %><option value="<%= k %>" <%= org.category === k ? 'selected' : '' %>><%= l %></option><% }) %></select></label>
+      </div>
+      <label class="fld"><span>Description</span><textarea name="description" rows="4" placeholder="What it is, who it's for, when they meet."><%= org.description %></textarea><small>The first two lines show on the card. The full text shows in the popup.</small></label>
+    </section>
+
+    <section class="adm-card fsec">
+      <h2>Photos <small class="muted">up to 4, the first one is the cover</small></h2>
+      <div class="uploader" data-uploader data-max="4" data-name="images[]">
+        <div class="thumbs" data-thumbs>
+          <% (org.images || []).forEach(src => { %><div class="thumb"><img src="<%= src %>" alt=""><input type="hidden" name="images[]" value="<%= src %>"><button type="button" class="x" data-remove aria-label="Remove"><%- icon('x', 14) %></button><button type="button" class="first" data-first>Make cover</button></div><% }) %>
+        </div>
+        <label class="drop"><input type="file" accept="image/*" multiple data-file hidden><%- icon('upload', 20) %><span><b>Upload photos</b><small>Choose several at once. Resized automatically.</small></span></label>
+      </div>
+      <label class="chk"><input type="checkbox" name="photosRepresentative" <%= org.photosRepresentative ? 'checked' : '' %>><span>These are stock / representative photos<small>Shows "Representative photos" in the popup. Untick once you have their real photos.</small></span></label>
+    </section>
+
+    <section class="adm-card fsec">
+      <h2>Location &amp; contact</h2>
+      <div class="row2">
+        <label class="fld"><span>Town</span><input name="town" value="<%= org.town %>" placeholder="Waltham"></label>
+        <label class="fld"><span>Area</span><select name="city"><option value="boston">Greater Boston</option></select></label>
+      </div>
+      <label class="fld"><span>Address</span><input name="address" value="<%= org.address %>" placeholder="133 School St, Waltham, MA 02451"><small>Used for the "Open in Maps" button.</small></label>
+      <div class="row2">
+        <label class="fld"><span>Phone</span><input name="phone" value="<%= org.phone %>"></label>
+        <label class="fld"><span>Website</span><input name="website" value="<%= org.website %>" placeholder="https://..."></label>
+      </div>
+    </section>
+  </div>
+  <aside class="form-side">
+    <div class="adm-card sticky">
+      <h2>Publish</h2>
+      <label class="fld"><span>Visibility</span><select name="status"><option value="published" <%= org.status !== 'hidden' ? 'selected' : '' %>>Shown on site</option><option value="hidden" <%= org.status === 'hidden' ? 'selected' : '' %>>Hidden</option></select></label>
+      <label class="chk"><input type="checkbox" name="verified" <%= org.verified ? 'checked' : '' %>><span>Details confirmed<small>Tick after you've called, visited, or heard from them.</small></span></label>
+      <button class="ab ab-coral wide" type="submit"><%- icon('check', 16) %>Save organization</button>
+      <a class="ab wide" href="/admin/organizations">Cancel</a>
+    </div>
+  </aside>
+</form>
+<%- include('partials/bottom') %>

@@ -1,0 +1,39 @@
+<%- include('partials/top', { title: 'Announcements', subtitle: 'Email the community about an event' }) %>
+<% if (!mailOn) { %><div class="adm-flash warn">Email isn't connected yet, so nothing actually sends. It only goes to the server log. Add the SMTP settings in Hostinger to send for real.</div><% } %>
+<div class="adm-cols">
+  <section class="adm-card">
+    <h2>New announcement</h2>
+    <form method="post" action="/admin/announcements/send" class="stack" data-confirm-unless-test>
+      <label class="fld"><span>Event</span>
+        <select name="slug"><% events.forEach(e => { %><option value="<%= e.slug %>" <%= preselect === e.slug ? 'selected' : '' %>><%= e.title %> · <%= e.dateLabel %></option><% }) %></select>
+        <% if (!events.length) { %><small>Publish an upcoming event first.</small><% } %>
+      </label>
+      <label class="fld"><span>Send to</span>
+        <select name="audience">
+          <option value="all">All confirmed members (<%= confirmedCount %>)</option>
+          <option value="interest">Only members into this kind of event</option>
+          <option value="boston">Only Greater Boston members</option>
+        </select></label>
+      <label class="chk"><input type="checkbox" name="test" value="yes" checked><span>Send a test to <%= contact %> only<small>Untick when the test looks right.</small></span></label>
+      <button class="ab ab-coral" type="submit" <%= events.length ? '' : 'disabled' %>><%- icon('send', 16) %>Send</button>
+    </form>
+  </section>
+  <section class="adm-card">
+    <h2>What members receive</h2>
+    <div class="email-mock">
+      <div class="em-head"><b>KYO<span>✺</span>NA</b><small>CONNECT</small></div>
+      <div class="em-body"><strong>EVENT TITLE</strong><p>Hi Nakato, this one's coming up.</p><p class="muted">Date · time · venue</p><span class="em-btn">Get tickets</span><small class="muted">Unsubscribe link included</small></div>
+    </div>
+  </section>
+</div>
+<section class="adm-card flush">
+  <div class="card-head pad"><h2>History</h2></div>
+  <table class="tbl">
+    <thead><tr><th>Sent</th><th>Event</th><th>Audience</th><th>Emails</th></tr></thead>
+    <tbody>
+      <% history.forEach(h => { %><tr><td><%= h.at.slice(0,16).replace('T',' ') %></td><td><%= h.title %></td><td><%= { all: 'All confirmed', interest: 'By interest', boston: 'Greater Boston' }[h.audience] || h.audience %><%= h.test ? ' (test)' : '' %></td><td><%= h.sent %></td></tr><% }) %>
+      <% if (!history.length) { %><tr><td colspan="4" class="muted">Nothing sent yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('partials/bottom') %>

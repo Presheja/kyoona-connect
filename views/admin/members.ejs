@@ -1,0 +1,35 @@
+<%- include('partials/top', { title: 'Community members', subtitle: 'Everyone who joined the Kyoona Connect community', actions: '<a class="ab" href="/admin/members.csv">' + icon('download', 16) + 'Download CSV</a>' }) %>
+<form class="toolbar" method="get">
+  <label class="search"><%- icon('search', 16) %><input name="q" value="<%= q %>" placeholder="Search by name, email or city..."><input type="hidden" name="f" value="<%= f %>"></label>
+  <div class="tabs">
+    <% [['all','All'],['confirmed','Confirmed'],['pending','Waiting to confirm'],['unsubscribed','Unsubscribed']].forEach(([k,l]) => { %>
+      <a class="tab <%= f === k ? 'on' : '' %>" href="?f=<%= k %>"><%= l %> <i><%= counts[k] %></i></a>
+    <% }) %>
+  </div>
+</form>
+<section class="adm-card flush">
+  <table class="tbl">
+    <thead><tr><th>Member</th><th>City</th><th>Into</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+    <tbody>
+    <% list.forEach(m => { %>
+      <tr>
+        <td><div class="who"><span class="av"><%= (m.first_name || m.email)[0].toUpperCase() %></span><div><strong><%= m.first_name || '—' %></strong><small><%= m.email %></small></div></div></td>
+        <td><%= m.city || '—' %></td>
+        <td><div class="tags"><% (m.interests || '').split(',').filter(Boolean).forEach(k => { const it = interests.find(i => i.key === k); %><span class="tag"><%- icon(k, 12) %><%= it ? it.label : k %></span><% }) %></div></td>
+        <td><span class="pill st-<%= m.status %>"><%= m.status === 'pending' ? 'waiting' : m.status %></span></td>
+        <td><%= String(m.created_at).slice(0,10) %></td>
+        <td class="row-actions">
+          <form method="post" action="/admin/members/action">
+            <input type="hidden" name="email" value="<%= m.email %>">
+            <% if (m.status === 'pending') { %><button class="ab" name="action" value="resend" type="submit"><%- icon('mail', 15) %>Resend</button><button class="ab" name="action" value="confirm" type="submit"><%- icon('check', 15) %>Confirm</button><% } %>
+            <% if (m.status === 'confirmed') { %><button class="ab" name="action" value="unsubscribe" type="submit"><%- icon('x', 15) %>Unsubscribe</button><% } %>
+            <button class="ab ab-danger" name="action" value="delete" type="submit" data-confirm-btn="Delete <%= m.email %> completely?" aria-label="Delete"><%- icon('trash', 15) %></button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+    <% if (!list.length) { %><tr><td colspan="6" class="muted">No members here yet. Share the link.</td></tr><% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('partials/bottom') %>

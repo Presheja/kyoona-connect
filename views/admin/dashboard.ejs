@@ -1,0 +1,55 @@
+<%- include('partials/top', { title: 'Dashboard', subtitle: 'How the community is growing', actions: '<a class="ab ab-coral" href="/admin/events/new">' + icon('plus', 16) + 'New event</a>' }) %>
+
+<div class="stat-grid">
+  <% stats.forEach(s => { %>
+    <a class="stat t-<%= s.tone %>" href="<%= s.href %>"><strong><%= s.value %></strong><span><%= s.label %></span></a>
+  <% }) %>
+</div>
+
+<div class="adm-cols">
+  <section class="adm-card">
+    <div class="card-head"><h2>Sign-ups, last 8 weeks</h2><a class="link" href="/admin/members">All members</a></div>
+    <div class="bars">
+      <% weeks.forEach(w => { %>
+        <div class="bar"><span class="bar-n"><%= w.n || '' %></span><i style="height:<%= Math.max(4, Math.round(w.n / maxWeek * 100)) %>%"></i><em><%= w.label %></em></div>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="adm-card">
+    <div class="card-head"><h2>Needs your attention</h2></div>
+    <% if (!todo.length) { %><p class="muted">All clear.</p><% } %>
+    <ul class="todo">
+      <% todo.slice(0, 7).forEach(t => { %><li><a href="<%= t.href %>"><span class="dot"></span><%= t.text %></a></li><% }) %>
+    </ul>
+  </section>
+</div>
+
+<div class="adm-cols">
+  <section class="adm-card">
+    <div class="card-head"><h2>Recent sign-ups</h2><a class="link" href="/admin/members">View all</a></div>
+    <table class="tbl">
+      <thead><tr><th>Member</th><th>City</th><th>Status</th><th>Joined</th></tr></thead>
+      <tbody>
+        <% recent.forEach(m => { %>
+          <tr><td><div class="who"><span class="av"><%= (m.first_name || m.email)[0].toUpperCase() %></span><div><strong><%= m.first_name || '—' %></strong><small><%= m.email %></small></div></div></td><td><%= m.city || '—' %></td><td><span class="pill st-<%= m.status %>"><%= m.status %></span></td><td><%= String(m.created_at).slice(0,10) %></td></tr>
+        <% }) %>
+        <% if (!recent.length) { %><tr><td colspan="4" class="muted">No sign-ups yet. Share the link.</td></tr><% } %>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="adm-card">
+    <div class="card-head"><h2>Coming up</h2><a class="link" href="/admin/events">All events</a></div>
+    <div class="mini-events">
+      <% nextEvents.forEach(e => { %>
+        <a class="mini-ev" href="/admin/events/<%= e.id %>/edit">
+          <span class="dbadge"><b><%= e.day %></b><%= e.month %></span>
+          <span><strong><%= e.title %></strong><small><%= e.venue %> · <span class="pill st-<%= e.status %>"><%= e.status %></span></small></span>
+        </a>
+      <% }) %>
+      <% if (!nextEvents.length) { %><p class="muted">Nothing scheduled. <a class="link" href="/admin/events/new">Add an event</a></p><% } %>
+    </div>
+  </section>
+</div>
+<%- include('partials/bottom') %>

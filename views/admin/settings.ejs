@@ -1,0 +1,23 @@
+<%- include('partials/top', { title: 'Settings', subtitle: 'Site-wide details and connection status' }) %>
+<div class="adm-cols">
+  <form class="adm-card stack" method="post" action="/admin/settings">
+    <h2>Site details</h2>
+    <label class="fld"><span>Contact email shown on the site</span><input name="supportEmail" type="email" value="<%= s.supportEmail || '' %>" placeholder="<%= CONTACT %>"><small>Leave empty to use <%= CONTACT %>.</small></label>
+    <label class="fld"><span>Notice bar</span><input name="announcement" value="<%= s.announcement || '' %>" maxlength="160" placeholder="e.g. Martyrs Day is confirmed for June 13. See you there."><small>One line shown at the very top of every page. Leave empty to hide it.</small></label>
+    <div class="row3">
+      <label class="fld"><span>Instagram link</span><input name="instagram" value="<%= s.instagram || '' %>" placeholder="https://instagram.com/..."></label>
+      <label class="fld"><span>Facebook link</span><input name="facebook" value="<%= s.facebook || '' %>" placeholder="https://facebook.com/..."></label>
+      <label class="fld"><span>WhatsApp link</span><input name="whatsapp" value="<%= s.whatsapp || '' %>" placeholder="https://chat.whatsapp.com/..."></label>
+    </div>
+    <button class="ab ab-coral" type="submit"><%- icon('check', 16) %>Save settings</button>
+  </form>
+  <section class="adm-card">
+    <h2>Connections</h2>
+    <ul class="conn">
+      <li class="<%= dbOn ? 'on' : 'off' %>"><span class="led"></span><div><strong>Database</strong><small><%= dbOn ? 'Connected to MySQL.' : 'Not connected. Data is in a temporary file and can be lost on redeploy. Add the DB_ settings.' %></small></div></li>
+      <li class="<%= mailOn ? 'on' : 'off' %>"><span class="led"></span><div><strong>Email (SMTP)</strong><small><%= mailOn ? 'Connected. Confirmations and announcements send.' : 'Not connected. Emails only go to the log. Add the SMTP_ settings.' %></small></div></li>
+      <li class="<%= SITE.startsWith('https') ? 'on' : 'off' %>"><span class="led"></span><div><strong>Site address</strong><small><%= SITE %></small></div></li>
+    </ul>
+  </section>
+</div>
+<%- include('partials/bottom') %>

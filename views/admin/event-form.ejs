@@ -1,0 +1,94 @@
+<%- include('partials/top', { title: isNew ? 'Create event' : 'Edit event', subtitle: isNew ? 'Fill in what you know. Save it as a draft until it is ready.' : ev.title, actions: '<a class="ab" href="/admin/events">Back to events</a>' }) %>
+<form class="form-layout" method="post" action="/admin/events/save" data-dirty>
+  <input type="hidden" name="id" value="<%= isNew ? '' : ev.id %>">
+  <div class="form-main">
+    <section class="adm-card fsec">
+      <h2>Basic details</h2>
+      <label class="fld"><span>Event title *</span><input name="title" value="<%= ev.title %>" required data-live="title" placeholder="Kampala Nights"></label>
+      <div class="row2">
+        <label class="fld"><span>Subtitle</span><input name="subtitle" value="<%= ev.subtitle %>" data-live="subtitle" placeholder="Boston Edition"></label>
+        <label class="fld"><span>Category</span><select name="category"><% interests.forEach(i => { %><option value="<%= i.key %>" <%= ev.category === i.key ? 'selected' : '' %>><%= i.label %></option><% }) %></select></label>
+      </div>
+      <label class="fld"><span>Handwritten line on the poster</span><input name="kicker" value="<%= ev.kicker %>" data-live="kicker" placeholder="Boston is outside"><small>Shows in the script font above the title when there's no cover image.</small></label>
+    </section>
+
+    <section class="adm-card fsec">
+      <h2>Cover image</h2>
+      <div class="uploader" data-uploader data-max="1" data-name="image">
+        <div class="thumbs" data-thumbs>
+          <% if (ev.image) { %><div class="thumb"><img src="<%= ev.image %>" alt=""><input type="hidden" name="image" value="<%= ev.image %>"><button type="button" class="x" data-remove aria-label="Remove"><%- icon('x', 14) %></button></div><% } %>
+        </div>
+        <label class="drop"><input type="file" accept="image/*" data-file hidden><%- icon('upload', 20) %><span><b>Upload a poster or photo</b><small>JPG, PNG or WebP. Resized automatically.</small></span></label>
+      </div>
+      <label class="fld"><span>No image? Pick a poster colour</span>
+        <div class="swatches">
+          <% ['purple','gold','magenta','teal'].forEach(a => { %><label class="sw art-<%= a %>"><input type="radio" name="art" value="<%= a %>" <%= ev.art === a ? 'checked' : '' %> data-live="art"><span></span></label><% }) %>
+        </div>
+      </label>
+    </section>
+
+    <section class="adm-card fsec">
+      <h2>Description</h2>
+      <label class="fld"><span>What is it, and why should people come?</span><textarea name="description" rows="5" placeholder="Afrobeats, dancehall, East African hits..."><%= ev.description %></textarea></label>
+    </section>
+
+    <section class="adm-card fsec">
+      <h2>Date &amp; time</h2>
+      <div class="row3">
+        <label class="fld"><span>Date *</span><input type="date" name="date" value="<%= ev.date %>" required></label>
+        <label class="fld"><span>Time</span><input name="time" value="<%= ev.time %>" placeholder="9:00 PM"></label>
+        <label class="chk"><input type="checkbox" name="dateConfirmed" <%= ev.dateConfirmed ? 'checked' : '' %>><span>Date confirmed<small>Untick to show "Date TBC"</small></span></label>
+      </div>
+    </section>
+
+    <section class="adm-card fsec">
+      <h2>Venue</h2>
+      <div class="row2">
+        <label class="fld"><span>Venue name</span><input name="venue" value="<%= ev.venue %>" placeholder="St. Mary's Parish"></label>
+        <label class="fld"><span>Area</span><select name="city"><option value="boston" <%= ev.city === 'boston' ? 'selected' : '' %>>Greater Boston</option><option value="travel" <%= ev.city === 'travel' ? 'selected' : '' %>>Out of town / travel</option></select></label>
+      </div>
+      <label class="fld"><span>Address</span><input name="address" value="<%= ev.address %>" placeholder="133 School St, Waltham, MA"></label>
+    </section>
+
+    <section class="adm-card fsec">
+      <h2>Organizer</h2>
+      <div class="row3">
+        <label class="fld"><span>Hosted by</span><input name="host" value="<%= ev.host %>" placeholder="Organization or person"></label>
+        <label class="fld"><span>Contact email</span><input name="contactEmail" type="email" value="<%= ev.contactEmail %>"></label>
+        <label class="fld"><span>Contact phone</span><input name="contactPhone" value="<%= ev.contactPhone %>"></label>
+      </div>
+      <small class="muted">Organizer contact details are for you only. They don't show on the site.</small>
+    </section>
+
+    <section class="adm-card fsec">
+      <h2>Tickets &amp; entry</h2>
+      <div class="row2">
+        <label class="fld"><span>Price shown</span><input name="price" value="<%= ev.price %>" placeholder="$35, Free, From $20"></label>
+        <label class="fld"><span>Ticket link</span><input name="ticketUrl" value="<%= ev.ticketUrl %>" placeholder="https://..."><small>Adds a "Get tickets" button. Leave empty for "Remind me".</small></label>
+      </div>
+    </section>
+  </div>
+
+  <aside class="form-side">
+    <div class="adm-card sticky">
+      <h2>Publish</h2>
+      <label class="fld"><span>Status</span>
+        <select name="status">
+          <option value="draft" <%= ev.status === 'draft' ? 'selected' : '' %>>Draft (hidden)</option>
+          <option value="published" <%= ev.status === 'published' ? 'selected' : '' %>>Published</option>
+          <option value="cancelled" <%= ev.status === 'cancelled' ? 'selected' : '' %>>Cancelled (hidden)</option>
+        </select></label>
+      <label class="chk"><input type="checkbox" name="featured" <%= ev.featured ? 'checked' : '' %>><span>Feature on home page<small>Shows in the "Next up" card. Only one at a time.</small></span></label>
+      <div class="preview art-<%= ev.art %>" data-preview <% if (ev.image) { %>style="background-image:url('<%= ev.image %>')"<% } %>>
+        <div class="pv-text" <%= ev.image ? 'hidden' : '' %>>
+          <em data-pv="kicker"><%= ev.kicker %></em>
+          <b data-pv="title"><%= ev.title || 'Event title' %></b>
+          <span data-pv="subtitle"><%= ev.subtitle %></span>
+        </div>
+      </div>
+      <button class="ab ab-coral wide" type="submit"><%- icon('check', 16) %>Save event</button>
+      <a class="ab wide" href="/admin/events">Cancel</a>
+    </div>
+  </aside>
+</form>
+<%- include('partials/bottom') %>

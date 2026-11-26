@@ -1,11 +1,11 @@
-<%- include('../partials/head', { bodyClass: 'admin' }) %>
-<main class="admin-login">
-  <a class="brand" href="/"><span class="brand-main">KYO<span class="brand-flower">✺</span>NA</span><span class="brand-sub">CONNECT</span></a>
-  <form method="post" action="/admin/login" class="join-card">
-    <h1 class="join-title">Admin</h1>
-    <label class="field"><span>Password</span><input type="password" name="password" autofocus required></label>
-    <% if (error) { %><div class="form-errors"><%= error %></div><% } %>
-    <button class="btn btn-ink btn-block" type="submit">Log in</button>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>Admin login · Kyoona Connect</title><link rel="icon" href="/icons/favicon.ico"><link rel="stylesheet" href="/css/admin.css?v=2"></head>
+<body class="adm-login">
+  <form method="post" action="/admin/login" class="login-card">
+    <div class="adm-brand dark"><span class="b1">KYO<span class="fl">✺</span>NA</span><span class="b2">ADMIN</span></div>
+    <label class="fld"><span>Password</span><input type="password" name="password" autofocus required></label>
+    <% if (error) { %><div class="adm-flash err"><%= error %></div><% } %>
+    <button class="ab ab-coral wide" type="submit">Log in</button>
   </form>
-</main>
 </body></html>
